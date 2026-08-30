@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PokeWord Master - แฟลชการ์ดคำศัพท์</title>
-    <!-- ใช้ฟอนต์เดียวที่ดูทันสมัย เข้ากับธีมเกม -->
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -16,7 +15,7 @@
             --pk-red: #cc0000;
             --pk-dark: #1a1a1a;
             --pokedex-red: #dd2020;
-            --screen-bg: #98fb98; /* สีเขียวจอ Gameboy */
+            --screen-bg: #98fb98;
         }
 
         body {
@@ -135,7 +134,6 @@
             box-shadow: 0 0 5px rgba(59, 76, 202, 0.4);
         }
 
-        /* --- สไตล์ส่วนจัดการเด็ค (PC Box) --- */
         .deck-item {
             display: flex;
             justify-content: space-between;
@@ -164,7 +162,6 @@
             box-shadow: 0 0 0 #8b0000;
         }
 
-        /* --- ตารางกรอกคำศัพท์ --- */
         .table-responsive {
             overflow-x: auto;
             margin-bottom: 15px;
@@ -251,7 +248,6 @@
             align-items: center;
         }
         
-        /* ตัวเครื่อง Pokedex */
         .pokedex-container {
             background-color: var(--pokedex-red);
             padding: 20px;
@@ -264,7 +260,6 @@
             position: relative;
         }
 
-        /* ไฟเลนส์ด้านบนซ้าย */
         .pokedex-lens {
             width: 50px;
             height: 50px;
@@ -287,7 +282,6 @@
             opacity: 0.6;
         }
 
-        /* หน้าจอ */
         .pokedex-screen-wrapper {
             background-color: #dfdfdf;
             padding: 15px;
@@ -306,6 +300,7 @@
             flex-direction: column;
             box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
             position: relative;
+            align-items: center; /* จัดให้อยู่ตรงกลาง */
         }
 
         .dex-header {
@@ -318,22 +313,45 @@
             padding-bottom: 5px;
             margin-bottom: 15px;
             text-transform: uppercase;
+            width: 100%;
         }
 
         .main-word-display {
-            font-size: 36px;
+            font-size: 40px;
             font-weight: bold;
             text-align: center;
             color: #111;
-            margin: auto 0;
+            margin-top: 20px;
             word-wrap: break-word;
+        }
+
+        /* ปุ่มฟังเสียง */
+        .speak-btn {
+            background-color: var(--pk-blue);
+            color: white;
+            border: 2px solid #1e3a8a;
+            border-radius: 20px;
+            padding: 6px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            font-family: 'Chakra Petch', sans-serif;
+            box-shadow: 0 3px 0 #1e3a8a;
+            display: none; /* ซ่อนไว้ก่อน จะโชว์เมื่อมีคำศัพท์ */
+            transition: transform 0.1s;
+        }
+        .speak-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 0 0 #1e3a8a;
         }
 
         .translation-box {
             display: none;
-            margin-top: 15px;
+            width: 100%;
+            margin-top: 10px;
             border-top: 2px dashed rgba(0,0,0,0.2);
-            padding-top: 10px;
+            padding-top: 15px;
         }
 
         .data-row {
@@ -354,7 +372,6 @@
         }
         .data-val { font-weight: 600; color: #111; }
 
-        /* ปุ่มด้านล่างเครื่อง */
         .pokedex-controls {
             display: flex;
             flex-direction: column;
@@ -399,7 +416,7 @@
         <div class="box">
             <h2>📦 1. ระบบจัดเก็บเด็ค (PC Box)</h2>
             <div class="form-group">
-                <input type="text" id="chapterName" placeholder="เช่น กล่องคำศัพท์ทั่วไป, หมวดหมู่โปเกมอนสายฟ้า">
+                <input type="text" id="chapterName" placeholder="เช่น กล่องคำศัพท์ HSK1">
             </div>
             <button class="btn-main" onclick="addChapter()">+ บันทึกกล่องใหม่</button>
 
@@ -427,17 +444,15 @@
                 <button class="btn-sec" onclick="clearEmptyRows()" style="background-color: #e2e8f0; border-color:#cbd5e1;">🧹 ลบแถวว่าง</button>
             </div>
 
-            <p style="font-size: 13px; color: #64748b; margin-top: -5px;">💡 *ทิป: คุณสามารถคัดลอกข้อมูลจาก Excel แล้ววางใส่ช่อง "คำศัพท์หลัก" แถวไหนก็ได้ ข้อมูลจะจัดลงตารางให้อัตโนมัติ</p>
-
             <div class="table-responsive">
                 <table class="word-table">
                     <thead>
                         <tr>
                             <th style="width: 5%;">#</th>
                             <th style="width: 23%;">คำศัพท์หลัก</th>
-                            <th style="width: 23%;">คำอ่าน</th>
+                            <th style="width: 23%;">พินอิน/คำอ่าน</th>
                             <th style="width: 23%;">หมวดหมู่/ประเภท</th>
-                            <th style="width: 23%;">ความหมาย/ข้อมูล</th>
+                            <th style="width: 23%;">ความหมาย</th>
                             <th style="width: 3%;">ลบ</th>
                         </tr>
                     </thead>
@@ -463,7 +478,6 @@
             <button class="btn-main" onclick="startStudy()" style="width: 100%;">เปิด Pokedex 🔍</button>
         </div>
 
-        <!-- ตัวเครื่อง Pokedex -->
         <div id="study-area" style="display: none;">
             
             <div class="pokedex-container">
@@ -478,6 +492,9 @@
 
                         <!-- คำศัพท์หลัก -->
                         <div class="main-word-display" id="display-col1"></div>
+                        
+                        <!-- ปุ่มฟังเสียงภาษาจีน -->
+                        <button id="btn-speak" class="speak-btn" onclick="speakChinese()">🔊 ฟังเสียง</button>
 
                         <!-- ข้อมูลที่ถูกซ่อน -->
                         <div class="translation-box" id="display-details">
@@ -511,12 +528,7 @@
     </div>
 
     <script>
-        // โหลดข้อมูลเก่า (ถ้ามี) โค้ดนี้ยังรองรับตัวแปรชุดเก่า (cn, pin, thRead, thMean)
-        let appData = JSON.parse(localStorage.getItem('pkmnWordData')) || {
-            chapters: [],
-            words: []
-        };
-
+        let appData = JSON.parse(localStorage.getItem('pkmnWordData')) || { chapters: [], words: [] };
         let currentStudyPool = [];
         let currentWordIndex = -1;
         let lastShownIndex = -1;
@@ -537,16 +549,10 @@
             }
         }
 
-        // --- ระบบ PC Box (Admin) ---
         function addChapter() {
             const chapterName = document.getElementById('chapterName').value.trim();
             if (!chapterName) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'ข้อความระบบ',
-                    text: 'กรุณาตั้งชื่อกล่องเก็บเด็ค (PC Box) ก่อนนะ!',
-                    confirmButtonText: 'ตกลง'
-                });
+                Swal.fire({ icon: 'warning', title: 'ข้อความระบบ', text: 'กรุณาตั้งชื่อกล่องเก็บเด็ค (PC Box) ก่อนนะ!' });
                 return;
             }
             
@@ -555,41 +561,25 @@
             saveData();
             document.getElementById('chapterName').value = '';
             updateDropdowns();
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'สำเร็จ!',
-                text: 'สร้างกล่องเด็คใหม่เรียบร้อยแล้ว',
-                timer: 1500,
-                showConfirmButton: false
-            });
+            Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: 'สร้างกล่องเด็คใหม่เรียบร้อยแล้ว', timer: 1500, showConfirmButton: false });
         }
 
         function deleteChapter(chapterId, chapterName) {
             Swal.fire({
                 title: 'แน่ใจหรือไม่?',
-                text: `คุณต้องการลบกล่อง "${chapterName}" และข้อมูลข้างในทิ้งใช่ไหม? (ข้อมูลจะหายไปตลอดกาล!)`,
+                text: `คุณต้องการลบกล่อง "${chapterName}" ทิ้งใช่ไหม?`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#cc0000',
-                cancelButtonColor: '#64748b',
                 confirmButtonText: 'ลบเลย!',
-                cancelButtonText: 'ยกเลิก',
-                customClass: { confirmButton: 'btn-danger' }
+                cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
                     appData.chapters = appData.chapters.filter(ch => ch.id !== chapterId);
                     appData.words = appData.words.filter(w => w.chapterId !== chapterId);
                     saveData();
                     updateDropdowns();
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'ลบสำเร็จ!',
-                        text: 'กล่องนี้ถูกทำลายเรียบร้อยแล้ว',
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
+                    Swal.fire({ icon: 'success', title: 'ลบสำเร็จ!', timer: 1500, showConfirmButton: false });
                 }
             });
         }
@@ -602,94 +592,66 @@
             adminSelect.innerHTML = '<option value="">-- กรุณาเลือกกล่องเด็ค --</option>';
             studySelect.innerHTML = '<option value="">-- กรุณาเลือกกล่องเด็ค --</option>';
             deckListAdmin.innerHTML = '';
-            
-            if (appData.chapters.length === 0) {
-                deckListAdmin.innerHTML = '<p style="color: #94a3b8; font-size: 14px; margin: 5px 0;">ยังไม่มีกล่องในระบบ PC</p>';
-            }
 
             appData.chapters.forEach(ch => {
                 adminSelect.innerHTML += `<option value="${ch.id}">${ch.name}</option>`;
                 studySelect.innerHTML += `<option value="${ch.id}">${ch.name}</option>`;
                 
                 const wordCount = appData.words.filter(w => w.chapterId === ch.id).length;
-                const deckItem = document.createElement('div');
-                deckItem.className = 'deck-item';
-                deckItem.innerHTML = `
-                    <span><strong>${ch.name}</strong> <small style="color:#64748b;">(บันทึก ${wordCount} ข้อมูล)</small></span>
-                    <button class="btn-del-deck" onclick="deleteChapter('${ch.id}', '${ch.name}')">ลบกล่องทิ้ง</button>
-                `;
-                deckListAdmin.appendChild(deckItem);
+                deckListAdmin.innerHTML += `
+                    <div class="deck-item">
+                        <span><strong>${ch.name}</strong> <small>(${wordCount} ข้อมูล)</small></span>
+                        <button class="btn-del-deck" onclick="deleteChapter('${ch.id}', '${ch.name}')">ลบ</button>
+                    </div>`;
             });
         }
 
-        // --- เพิ่มคำศัพท์แบบตาราง ---
-        function addTableRow(col1 = '', col2 = '', col3 = '', col4 = '') {
+        function addTableRow() {
             const tbody = document.getElementById('tableBody');
-            const rowCount = tbody.children.length + 1;
             const tr = document.createElement('tr');
-            
             tr.innerHTML = `
-                <td style="text-align:center; color:#64748b; font-size:12px;">${rowCount}</td>
-                <td><input type="text" class="in-col1" value="${col1}" placeholder="Pikachu" onpaste="handlePasteOnInput(event, this)"></td>
-                <td><input type="text" class="in-col2" value="${col2}" placeholder="พิกะจู"></td>
-                <td><input type="text" class="in-col3" value="${col3}" placeholder="สายฟ้า"></td>
-                <td><input type="text" class="in-col4" value="${col4}" placeholder="โปเกมอนหนู"></td>
+                <td style="text-align:center;">-</td>
+                <td><input type="text" class="in-col1" placeholder="เช่น 你好" onpaste="handlePasteOnInput(event, this)"></td>
+                <td><input type="text" class="in-col2" placeholder="nǐ hǎo"></td>
+                <td><input type="text" class="in-col3" placeholder="คำทักทาย"></td>
+                <td><input type="text" class="in-col4" placeholder="สวัสดี"></td>
                 <td style="text-align:center;"><button class="btn-del-row" onclick="removeRow(this)">✕</button></td>
             `;
             tbody.appendChild(tr);
             updateRowNumbers();
         }
 
-        function addMultipleRows(count) {
-            for(let i = 0; i < count; i++) addTableRow();
-        }
-
-        function removeRow(btn) {
-            btn.closest('tr').remove();
-            updateRowNumbers();
-        }
-
+        function addMultipleRows(count) { for(let i = 0; i < count; i++) addTableRow(); }
+        function removeRow(btn) { btn.closest('tr').remove(); updateRowNumbers(); }
+        
         function updateRowNumbers() {
-            const rows = document.querySelectorAll('#tableBody tr');
-            rows.forEach((row, index) => {
+            document.querySelectorAll('#tableBody tr').forEach((row, index) => {
                 row.children[0].innerText = index + 1;
             });
         }
 
         function clearEmptyRows() {
-            const rows = document.querySelectorAll('#tableBody tr');
-            rows.forEach(row => {
-                const col1 = row.querySelector('.in-col1').value.trim();
-                const col4 = row.querySelector('.in-col4').value.trim();
-                if (!col1 && !col4) row.remove();
+            document.querySelectorAll('#tableBody tr').forEach(row => {
+                if (!row.querySelector('.in-col1').value.trim()) row.remove();
             });
             updateRowNumbers();
         }
 
         function handlePasteOnInput(e, inputElem) {
-            const clipboardData = (e.clipboardData || window.clipboardData).getData('text');
-            if (clipboardData && clipboardData.includes('\t')) {
+            const clip = (e.clipboardData || window.clipboardData).getData('text');
+            if (clip && clip.includes('\t')) {
                 e.preventDefault();
-                const lines = clipboardData.trim().split('\n');
+                const lines = clip.trim().split('\n');
                 let targetRow = inputElem.closest('tr');
 
-                lines.forEach((line) => {
+                lines.forEach(line => {
                     const cols = line.split('\t');
-                    if (cols.length >= 2) {
-                        if (!targetRow) {
-                            addTableRow(
-                                cols[0] ? cols[0].trim() : '',
-                                cols[1] ? cols[1].trim() : '',
-                                cols[2] ? cols[2].trim() : '',
-                                cols[3] ? cols[3].trim() : ''
-                            );
-                        } else {
-                            targetRow.querySelector('.in-col1').value = cols[0] ? cols[0].trim() : '';
-                            targetRow.querySelector('.in-col2').value = cols[1] ? cols[1].trim() : '';
-                            targetRow.querySelector('.in-col3').value = cols[2] ? cols[2].trim() : '';
-                            targetRow.querySelector('.in-col4').value = cols[3] ? cols[3].trim() : '';
-                            targetRow = targetRow.nextElementSibling;
-                        }
+                    if (cols.length >= 2 && targetRow) {
+                        targetRow.querySelector('.in-col1').value = cols[0] || '';
+                        targetRow.querySelector('.in-col2').value = cols[1] || '';
+                        targetRow.querySelector('.in-col3').value = cols[2] || '';
+                        targetRow.querySelector('.in-col4').value = cols[3] || '';
+                        targetRow = targetRow.nextElementSibling;
                     }
                 });
             }
@@ -697,26 +659,19 @@
 
         function saveTableWords() {
             const chapterId = document.getElementById('chapterSelectAdmin').value;
-            if (!chapterId) {
-                Swal.fire({ icon: 'warning', title: 'แจ้งเตือน', text: 'กรุณาเลือกกล่องเด็คด้านบนก่อนนะ!' });
-                return;
-            }
+            if (!chapterId) return Swal.fire({ icon: 'warning', text: 'เลือกกล่องเด็คก่อนนะ!' });
 
-            const rows = document.querySelectorAll('#tableBody tr');
             let savedCount = 0;
-
-            rows.forEach(row => {
+            document.querySelectorAll('#tableBody tr').forEach(row => {
                 const col1 = row.querySelector('.in-col1').value.trim();
-                const col2 = row.querySelector('.in-col2').value.trim();
-                const col3 = row.querySelector('.in-col3').value.trim();
-                const col4 = row.querySelector('.in-col4').value.trim();
-
-                // ใช้ชื่อ key ชุดใหม่ (และรองรับชุดเก่าด้วยการบันทึกลงไปพร้อมกันเพื่อความเข้ากันได้)
-                if (col1 && col4) {
+                if (col1) {
                     appData.words.push({ 
                         chapterId, 
-                        col1: col1, col2: col2, col3: col3, col4: col4,
-                        cn: col1, pin: col2, thRead: col3, thMean: col4 // เผื่อความเข้ากันได้
+                        col1: col1, 
+                        col2: row.querySelector('.in-col2').value.trim(), 
+                        col3: row.querySelector('.in-col3').value.trim(), 
+                        col4: row.querySelector('.in-col4').value.trim(),
+                        cn: col1 // รองรับข้อมูลเก่า
                     });
                     savedCount++;
                 }
@@ -727,30 +682,19 @@
                 document.getElementById('tableBody').innerHTML = '';
                 addMultipleRows(3);
                 updateDropdowns(); 
-                Swal.fire({ icon: 'success', title: 'ยอดเยี่ยม!', text: `บันทึกข้อมูล ${savedCount} รายการ ลงใน Pokedex สำเร็จ!` });
-            } else {
-                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'กรุณากรอก "คำศัพท์หลัก" และ "ความหมาย" อย่างน้อย 1 แถว' });
+                Swal.fire({ icon: 'success', text: `บันทึกข้อมูล ${savedCount} รายการ สำเร็จ!` });
             }
         }
 
-        function saveData() {
-            localStorage.setItem('pkmnWordData', JSON.stringify(appData));
-        }
+        function saveData() { localStorage.setItem('pkmnWordData', JSON.stringify(appData)); }
 
-        // --- ระบบ Pokedex (Battle Mode) ---
+        // --- Pokedex & Text-to-Speech ---
         function startStudy() {
             const chapterId = document.getElementById('chapterSelectStudy').value;
-            if (!chapterId) {
-                Swal.fire({ icon: 'info', title: 'เตรียมพร้อม!', text: 'กรุณาเลือกกล่องเด็คที่ต้องการเปิดดูก่อน' });
-                return;
-            }
+            if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อน' });
 
             currentStudyPool = appData.words.filter(w => w.chapterId === chapterId);
-            
-            if (currentStudyPool.length === 0) {
-                Swal.fire({ icon: 'warning', title: 'กล่องว่างเปล่า', text: 'ยังไม่มีข้อมูลในกล่องนี้ ลองไปเพิ่มในจัดการ PC Box ดูนะ!' });
-                return;
-            }
+            if (currentStudyPool.length === 0) return Swal.fire({ icon: 'warning', text: 'กล่องว่างเปล่า!' });
 
             document.getElementById('study-area').style.display = 'flex';
             lastShownIndex = -1;
@@ -760,8 +704,7 @@
         function nextRandomWord() {
             if (currentStudyPool.length === 0) {
                 document.getElementById('study-area').style.display = 'none';
-                Swal.fire({ icon: 'success', title: 'Master!', text: '🏆 ยินดีด้วย! คุณจดจำข้อมูลทั้งหมดในเด็คนี้ได้แล้ว!' });
-                return;
+                return Swal.fire({ icon: 'success', title: 'Master!', text: 'คุณจดจำข้อมูลทั้งหมดได้แล้ว!' });
             }
 
             document.getElementById('card-counter').innerText = `เหลือข้อมูล: ${currentStudyPool.length}`;
@@ -775,12 +718,14 @@
             lastShownIndex = currentWordIndex;
             const word = currentStudyPool[currentWordIndex];
 
-            // ดึงข้อมูล (รองรับทั้ง key ใหม่โหมด Pokedex และ key เก่าโหมดจีน)
             document.getElementById('display-col1').innerText = word.col1 || word.cn || '-';
             document.getElementById('display-col2').innerText = word.col2 || word.pin || '-';
             document.getElementById('display-col3').innerText = word.col3 || word.thRead || '-';
             document.getElementById('display-col4').innerText = word.col4 || word.thMean || '-';
             
+            // แสดงปุ่มฟังเสียง
+            document.getElementById('btn-speak').style.display = 'block';
+
             document.getElementById('display-details').style.display = 'none';
             document.getElementById('btn-show-trans').style.display = 'block';
             document.getElementById('action-buttons').style.display = 'none';
@@ -800,7 +745,18 @@
             nextRandomWord();
         }
 
-        // เริ่มต้นการทำงาน
+        // ฟังก์ชันอ่านออกเสียงภาษาจีน (Text to Speech)
+        function speakChinese() {
+            const word = document.getElementById('display-col1').innerText;
+            if (!word || word === '-') return;
+            
+            // ใช้ Web Speech API เพื่ออ่านออกเสียงเป็นภาษาจีนตัวย่อ (zh-CN)
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'zh-CN'; 
+            utterance.rate = 0.9; // ปรับความเร็วให้อ่านช้าลงนิดนึงเพื่อให้ฟังง่าย
+            window.speechSynthesis.speak(utterance);
+        }
+
         updateDropdowns();
         addMultipleRows(5);
     </script>
