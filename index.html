@@ -69,15 +69,17 @@
         .tabs {
             margin-top: 20px;
             display: flex;
-            gap: 15px;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .tab-btn {
             background-color: white;
             color: var(--pk-blue);
             border: 3px solid var(--pk-blue);
-            padding: 10px 20px;
+            padding: 10px 15px;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             border-radius: 25px;
             transition: all 0.2s;
@@ -241,8 +243,8 @@
             box-shadow: 0 0 0 #1e3a8a;
         }
 
-        /* ================= โหมด Pokedex ================= */
-        #study-area { 
+        /* ================= โหมด Pokedex & Dictation ================= */
+        .play-area { 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -300,7 +302,7 @@
             flex-direction: column;
             box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
             position: relative;
-            align-items: center; /* จัดให้อยู่ตรงกลาง */
+            align-items: center; 
         }
 
         .dex-header {
@@ -325,32 +327,31 @@
             word-wrap: break-word;
         }
 
-        /* ปุ่มฟังเสียง */
         .speak-btn {
             background-color: var(--pk-blue);
             color: white;
             border: 2px solid #1e3a8a;
             border-radius: 20px;
-            padding: 6px 15px;
-            font-size: 14px;
+            padding: 8px 20px;
+            font-size: 16px;
             cursor: pointer;
             margin-top: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-family: 'Chakra Petch', sans-serif;
-            box-shadow: 0 3px 0 #1e3a8a;
-            display: none; /* ซ่อนไว้ก่อน จะโชว์เมื่อมีคำศัพท์ */
+            font-weight: bold;
+            box-shadow: 0 4px 0 #1e3a8a;
             transition: transform 0.1s;
         }
         .speak-btn:active {
-            transform: translateY(3px);
+            transform: translateY(4px);
             box-shadow: 0 0 0 #1e3a8a;
         }
 
-        .translation-box {
+        .translation-box, .reveal-box {
             display: none;
             width: 100%;
             margin-top: 10px;
-            border-top: 2px dashed rgba(0,0,0,0.2);
+            border-top: 2px dashed #555;
             padding-top: 15px;
         }
 
@@ -396,6 +397,7 @@
         .battle-actions { display: none; gap: 10px; width: 100%; }
         .btn-catch { background-color: #22c55e; color: white; flex: 1; box-shadow: 0 4px 0 #166534; }
         .btn-run { background-color: #333; color: white; flex: 1; box-shadow: 0 4px 0 #000; }
+        .btn-check { background-color: var(--pk-blue); color: white; flex: 2; box-shadow: 0 4px 0 #1e3a8a; }
 
     </style>
 </head>
@@ -407,12 +409,100 @@
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('study')">🎮 โหมดแบทเทิล</button>
+        <button class="tab-btn" onclick="switchTab('dictation')">📝 ภารกิจแกะรอยเสียง (เขียนกระดาษ)</button>
         <button class="tab-btn" onclick="switchTab('admin')">⚙️ จัดการ PC Box</button>
     </div>
 
-    <!-- ================= ส่วนของ Admin (PC Box) ================= -->
+    <!-- ================= 1. โหมดแบทเทิล (Flashcard) ================= -->
+    <div class="container active" id="study-container">
+        <div class="box">
+            <h2>🎒 เลือกเด็คสำหรับแบทเทิล (ท่องจำ)</h2>
+            <div class="form-group">
+                <select id="chapterSelectStudy">
+                    <option value="">-- กรุณาเลือกกล่องเด็ค --</option>
+                </select>
+            </div>
+            <button class="btn-main" onclick="startStudy()" style="width: 100%;">เปิด Pokedex 🔍</button>
+        </div>
+
+        <div id="study-area" class="play-area" style="display: none;">
+            <div class="pokedex-container">
+                <div class="pokedex-lens"></div>
+                <div class="pokedex-screen-wrapper">
+                    <div class="pokedex-screen">
+                        <div class="dex-header">
+                            <span>BATTLE MODE</span>
+                            <span id="card-counter">เหลือ: 0</span>
+                        </div>
+                        <div class="main-word-display" id="display-col1"></div>
+                        <button id="btn-speak" class="speak-btn" onclick="speakChinese(document.getElementById('display-col1').innerText)">🔊 ฟังเสียง</button>
+                        
+                        <div class="translation-box" id="display-details">
+                            <div class="data-row"><span class="data-label" style="background:#3b82f6;">คำอ่าน</span><span class="data-val" id="display-col2"></span></div>
+                            <div class="data-row"><span class="data-label" style="background:#eab308; color:black;">ประเภท</span><span class="data-val" id="display-col3"></span></div>
+                            <div class="data-row"><span class="data-label" style="background:#ef4444;">ข้อมูล</span><span class="data-val" id="display-col4"></span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pokedex-controls">
+                    <button id="btn-show-trans" class="action-btn btn-scan" onclick="showTranslation()">กดเพื่อสแกนข้อมูล 📡</button>
+                    <div class="battle-actions" id="action-buttons">
+                        <button class="action-btn btn-catch" onclick="markWord(true)">จับได้แล้ว! (จำได้)</button>
+                        <button class="action-btn btn-run" onclick="markWord(false)">หนีไป.. (จำไม่ได้)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 2. โหมดเขียนตามคำบอก (ภารกิจแกะรอยเสียง) ================= -->
+    <div class="container" id="dictation-container">
+        <div class="box">
+            <h2>📻 ศูนย์วิจัยโปเกมอน: ภารกิจแกะรอยเสียง</h2>
+            <p style="color: #444; font-size: 15px; margin-top: 0;"><b>วิธีเล่น:</b> หยิบสมุดและปากกาขึ้นมา! ฟังเสียงคำศัพท์ แล้วเขียนลงในกระดาษของคุณ จากนั้นกดดูเฉลยเพื่อตรวจความถูกต้องด้วยตัวเอง</p>
+            <div class="form-group">
+                <select id="chapterSelectDictation">
+                    <option value="">-- กรุณาเลือกกล่องเด็คเพื่อทำการวิจัย --</option>
+                </select>
+            </div>
+            <button class="btn-main" onclick="startDictation()" style="width: 100%; background-color:#22c55e; box-shadow: 0 4px 0 #166534;">เริ่มภารกิจวิจัย 🎧</button>
+        </div>
+
+        <div id="dictation-area" class="play-area" style="display: none;">
+            <div class="pokedex-container">
+                <div class="pokedex-lens"></div>
+                <div class="pokedex-screen-wrapper">
+                    <div class="pokedex-screen">
+                        <div class="dex-header">
+                            <span>RESEARCH MISSION</span>
+                            <span id="dic-counter">เหลือ: 0</span>
+                        </div>
+                        
+                        <p style="text-align:center; font-weight:bold; color:#1e3a8a; margin-bottom: 5px; font-size:18px;">✍️ เตรียมกระดาษและปากกาให้พร้อม!</p>
+                        
+                        <button class="speak-btn" style="display:block; transform: scale(1.1); margin-top:15px; margin-bottom:5px;" onclick="speakChinese(document.getElementById('dic-target-word').innerText)">🔊 กดเพื่อฟังเสียงรหัสลับ</button>
+                        
+                        <!-- พื้นที่สำหรับเฉลย -->
+                        <div class="reveal-box" id="dic-reveal-area">
+                            <div class="main-word-display" id="dic-target-word" style="margin-top:0; color:#cc0000;"></div>
+                            <div class="data-row" style="margin-top:15px;"><span class="data-label" style="background:#3b82f6;">คำอ่าน</span><span class="data-val" id="dic-col2"></span></div>
+                            <div class="data-row"><span class="data-label" style="background:#ef4444;">ความหมาย</span><span class="data-val" id="dic-col4"></span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pokedex-controls">
+                    <button id="btn-reveal-dic" class="action-btn btn-scan" onclick="revealDictationAnswer()">🔍 สแกนดูเฉลย</button>
+                    <div class="battle-actions" id="dic-action-buttons">
+                        <button class="action-btn btn-catch" onclick="markDictationWord(true)">เขียนถูก! ✅</button>
+                        <button class="action-btn btn-run" onclick="markDictationWord(false)">เขียนผิด ❌</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 3. ส่วนของ Admin (PC Box) ================= -->
     <div class="container" id="admin-container">
-        
         <div class="box">
             <h2>📦 1. ระบบจัดเก็บเด็ค (PC Box)</h2>
             <div class="form-group">
@@ -422,15 +512,12 @@
 
             <div style="margin-top: 25px;">
                 <label>📋 รายการกล่องเด็คทั้งหมดในระบบ:</label>
-                <div id="deckListAdmin">
-                    <!-- รายการเด็คจะถูกเพิ่มตรงนี้ -->
-                </div>
+                <div id="deckListAdmin"></div>
             </div>
         </div>
 
         <div class="box">
             <h2>📊 2. ตารางบันทึกข้อมูลคำศัพท์</h2>
-            
             <div class="form-group">
                 <label>เลือกกล่องเด็คที่ต้องการเพิ่มคำศัพท์:</label>
                 <select id="chapterSelectAdmin">
@@ -456,9 +543,7 @@
                             <th style="width: 3%;">ลบ</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody">
-                        <!-- แถวตารางจะถูกสร้างที่นี่ -->
-                    </tbody>
+                    <tbody id="tableBody"></tbody>
                 </table>
             </div>
 
@@ -466,98 +551,45 @@
         </div>
     </div>
 
-    <!-- ================= ส่วนของการท่องจำ (Pokedex) ================= -->
-    <div class="container active" id="study-container">
-        <div class="box">
-            <h2>🎒 เลือกกล่องเด็คที่จะฝึกฝน</h2>
-            <div class="form-group">
-                <select id="chapterSelectStudy">
-                    <option value="">-- กรุณาเลือกกล่องเด็ค --</option>
-                </select>
-            </div>
-            <button class="btn-main" onclick="startStudy()" style="width: 100%;">เปิด Pokedex 🔍</button>
-        </div>
-
-        <div id="study-area" style="display: none;">
-            
-            <div class="pokedex-container">
-                <div class="pokedex-lens"></div>
-                
-                <div class="pokedex-screen-wrapper">
-                    <div class="pokedex-screen">
-                        <div class="dex-header">
-                            <span>POKEDEX DATA</span>
-                            <span id="card-counter">เหลือ: 0</span>
-                        </div>
-
-                        <!-- คำศัพท์หลัก -->
-                        <div class="main-word-display" id="display-col1"></div>
-                        
-                        <!-- ปุ่มฟังเสียงภาษาจีน -->
-                        <button id="btn-speak" class="speak-btn" onclick="speakChinese()">🔊 ฟังเสียง</button>
-
-                        <!-- ข้อมูลที่ถูกซ่อน -->
-                        <div class="translation-box" id="display-details">
-                            <div class="data-row">
-                                <span class="data-label" style="background:#3b82f6;">คำอ่าน</span>
-                                <span class="data-val" id="display-col2"></span>
-                            </div>
-                            <div class="data-row">
-                                <span class="data-label" style="background:#eab308; color:black;">ประเภท</span>
-                                <span class="data-val" id="display-col3"></span>
-                            </div>
-                            <div class="data-row">
-                                <span class="data-label" style="background:#ef4444;">ข้อมูล</span>
-                                <span class="data-val" id="display-col4"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pokedex-controls">
-                    <button id="btn-show-trans" class="action-btn btn-scan" onclick="showTranslation()">กดเพื่อสแกนข้อมูล 📡</button>
-                    
-                    <div class="battle-actions" id="action-buttons">
-                        <button class="action-btn btn-catch" onclick="markWord(true)">จับได้แล้ว! (จำได้)</button>
-                        <button class="action-btn btn-run" onclick="markWord(false)">หนีไป.. (จำไม่ได้)</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
     <script>
         let appData = JSON.parse(localStorage.getItem('pkmnWordData')) || { chapters: [], words: [] };
+        
+        // ตัวแปรสำหรับ Battle Mode
         let currentStudyPool = [];
         let currentWordIndex = -1;
         let lastShownIndex = -1;
 
-        function switchTab(tab) {
-            document.getElementById('admin-container').classList.remove('active');
-            document.getElementById('study-container').classList.remove('active');
-            document.querySelectorAll('.tab-btn')[0].classList.remove('active');
-            document.querySelectorAll('.tab-btn')[1].classList.remove('active');
+        // ตัวแปรสำหรับ Dictation Mode (Research)
+        let dictationPool = [];
+        let currentDictWord = null;
 
-            if (tab === 'admin') {
-                document.getElementById('admin-container').classList.add('active');
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-            } else {
+        function switchTab(tab) {
+            document.getElementById('study-container').classList.remove('active');
+            document.getElementById('dictation-container').classList.remove('active');
+            document.getElementById('admin-container').classList.remove('active');
+            
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+
+            if (tab === 'study') {
                 document.getElementById('study-container').classList.add('active');
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                updateDropdowns(); 
+                btns[0].classList.add('active');
+            } else if (tab === 'dictation') {
+                document.getElementById('dictation-container').classList.add('active');
+                btns[1].classList.add('active');
+            } else if (tab === 'admin') {
+                document.getElementById('admin-container').classList.add('active');
+                btns[2].classList.add('active');
             }
+            updateDropdowns(); 
         }
 
+        // --- ระบบ PC Box (Admin) ---
         function addChapter() {
             const chapterName = document.getElementById('chapterName').value.trim();
-            if (!chapterName) {
-                Swal.fire({ icon: 'warning', title: 'ข้อความระบบ', text: 'กรุณาตั้งชื่อกล่องเก็บเด็ค (PC Box) ก่อนนะ!' });
-                return;
-            }
+            if (!chapterName) return Swal.fire({ icon: 'warning', text: 'กรุณาตั้งชื่อกล่องเก็บเด็ค (PC Box) ก่อนนะ!' });
             
-            const newChapter = { id: Date.now().toString(), name: chapterName };
-            appData.chapters.push(newChapter);
+            appData.chapters.push({ id: Date.now().toString(), name: chapterName });
             saveData();
             document.getElementById('chapterName').value = '';
             updateDropdowns();
@@ -566,19 +598,13 @@
 
         function deleteChapter(chapterId, chapterName) {
             Swal.fire({
-                title: 'แน่ใจหรือไม่?',
-                text: `คุณต้องการลบกล่อง "${chapterName}" ทิ้งใช่ไหม?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#cc0000',
-                confirmButtonText: 'ลบเลย!',
-                cancelButtonText: 'ยกเลิก'
+                title: 'แน่ใจหรือไม่?', text: `คุณต้องการลบกล่อง "${chapterName}" ทิ้งใช่ไหม?`, icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#cc0000', confirmButtonText: 'ลบเลย!', cancelButtonText: 'ยกเลิก'
             }).then((result) => {
                 if (result.isConfirmed) {
                     appData.chapters = appData.chapters.filter(ch => ch.id !== chapterId);
                     appData.words = appData.words.filter(w => w.chapterId !== chapterId);
-                    saveData();
-                    updateDropdowns();
+                    saveData(); updateDropdowns();
                     Swal.fire({ icon: 'success', title: 'ลบสำเร็จ!', timer: 1500, showConfirmButton: false });
                 }
             });
@@ -587,15 +613,18 @@
         function updateDropdowns() {
             const adminSelect = document.getElementById('chapterSelectAdmin');
             const studySelect = document.getElementById('chapterSelectStudy');
+            const dictSelect = document.getElementById('chapterSelectDictation');
             const deckListAdmin = document.getElementById('deckListAdmin');
             
-            adminSelect.innerHTML = '<option value="">-- กรุณาเลือกกล่องเด็ค --</option>';
-            studySelect.innerHTML = '<option value="">-- กรุณาเลือกกล่องเด็ค --</option>';
+            const defaultOpt = '<option value="">-- กรุณาเลือกกล่องเด็ค --</option>';
+            adminSelect.innerHTML = studySelect.innerHTML = dictSelect.innerHTML = defaultOpt;
             deckListAdmin.innerHTML = '';
 
             appData.chapters.forEach(ch => {
-                adminSelect.innerHTML += `<option value="${ch.id}">${ch.name}</option>`;
-                studySelect.innerHTML += `<option value="${ch.id}">${ch.name}</option>`;
+                const opt = `<option value="${ch.id}">${ch.name}</option>`;
+                adminSelect.innerHTML += opt;
+                studySelect.innerHTML += opt;
+                dictSelect.innerHTML += opt;
                 
                 const wordCount = appData.words.filter(w => w.chapterId === ch.id).length;
                 deckListAdmin.innerHTML += `
@@ -606,6 +635,7 @@
             });
         }
 
+        // --- เพิ่มคำศัพท์ ---
         function addTableRow() {
             const tbody = document.getElementById('tableBody');
             const tr = document.createElement('tr');
@@ -617,19 +647,12 @@
                 <td><input type="text" class="in-col4" placeholder="สวัสดี"></td>
                 <td style="text-align:center;"><button class="btn-del-row" onclick="removeRow(this)">✕</button></td>
             `;
-            tbody.appendChild(tr);
-            updateRowNumbers();
+            tbody.appendChild(tr); updateRowNumbers();
         }
 
         function addMultipleRows(count) { for(let i = 0; i < count; i++) addTableRow(); }
         function removeRow(btn) { btn.closest('tr').remove(); updateRowNumbers(); }
-        
-        function updateRowNumbers() {
-            document.querySelectorAll('#tableBody tr').forEach((row, index) => {
-                row.children[0].innerText = index + 1;
-            });
-        }
-
+        function updateRowNumbers() { document.querySelectorAll('#tableBody tr').forEach((row, i) => row.children[0].innerText = i + 1); }
         function clearEmptyRows() {
             document.querySelectorAll('#tableBody tr').forEach(row => {
                 if (!row.querySelector('.in-col1').value.trim()) row.remove();
@@ -643,7 +666,6 @@
                 e.preventDefault();
                 const lines = clip.trim().split('\n');
                 let targetRow = inputElem.closest('tr');
-
                 lines.forEach(line => {
                     const cols = line.split('\t');
                     if (cols.length >= 2 && targetRow) {
@@ -666,12 +688,11 @@
                 const col1 = row.querySelector('.in-col1').value.trim();
                 if (col1) {
                     appData.words.push({ 
-                        chapterId, 
-                        col1: col1, 
+                        chapterId, col1: col1, 
                         col2: row.querySelector('.in-col2').value.trim(), 
                         col3: row.querySelector('.in-col3').value.trim(), 
                         col4: row.querySelector('.in-col4').value.trim(),
-                        cn: col1 // รองรับข้อมูลเก่า
+                        cn: col1 
                     });
                     savedCount++;
                 }
@@ -680,15 +701,22 @@
             if (savedCount > 0) {
                 saveData();
                 document.getElementById('tableBody').innerHTML = '';
-                addMultipleRows(3);
-                updateDropdowns(); 
+                addMultipleRows(3); updateDropdowns(); 
                 Swal.fire({ icon: 'success', text: `บันทึกข้อมูล ${savedCount} รายการ สำเร็จ!` });
             }
         }
-
         function saveData() { localStorage.setItem('pkmnWordData', JSON.stringify(appData)); }
 
-        // --- Pokedex & Text-to-Speech ---
+        // --- TTS ระบบอ่านออกเสียงภาษาจีน ---
+        function speakChinese(wordToSpeak) {
+            if (!wordToSpeak || wordToSpeak === '-') return;
+            const utterance = new SpeechSynthesisUtterance(wordToSpeak);
+            utterance.lang = 'zh-CN'; 
+            utterance.rate = 0.85; 
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // ================= 1. Pokedex Battle Mode =================
         function startStudy() {
             const chapterId = document.getElementById('chapterSelectStudy').value;
             if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อน' });
@@ -697,8 +725,7 @@
             if (currentStudyPool.length === 0) return Swal.fire({ icon: 'warning', text: 'กล่องว่างเปล่า!' });
 
             document.getElementById('study-area').style.display = 'flex';
-            lastShownIndex = -1;
-            nextRandomWord();
+            lastShownIndex = -1; nextRandomWord();
         }
 
         function nextRandomWord() {
@@ -706,16 +733,12 @@
                 document.getElementById('study-area').style.display = 'none';
                 return Swal.fire({ icon: 'success', title: 'Master!', text: 'คุณจดจำข้อมูลทั้งหมดได้แล้ว!' });
             }
-
             document.getElementById('card-counter').innerText = `เหลือข้อมูล: ${currentStudyPool.length}`;
 
             let randIdx = Math.floor(Math.random() * currentStudyPool.length);
-            if (currentStudyPool.length > 1 && randIdx === lastShownIndex) {
-                randIdx = (randIdx + 1) % currentStudyPool.length;
-            }
+            if (currentStudyPool.length > 1 && randIdx === lastShownIndex) randIdx = (randIdx + 1) % currentStudyPool.length;
             
-            currentWordIndex = randIdx;
-            lastShownIndex = currentWordIndex;
+            currentWordIndex = randIdx; lastShownIndex = currentWordIndex;
             const word = currentStudyPool[currentWordIndex];
 
             document.getElementById('display-col1').innerText = word.col1 || word.cn || '-';
@@ -723,9 +746,7 @@
             document.getElementById('display-col3').innerText = word.col3 || word.thRead || '-';
             document.getElementById('display-col4').innerText = word.col4 || word.thMean || '-';
             
-            // แสดงปุ่มฟังเสียง
             document.getElementById('btn-speak').style.display = 'block';
-
             document.getElementById('display-details').style.display = 'none';
             document.getElementById('btn-show-trans').style.display = 'block';
             document.getElementById('action-buttons').style.display = 'none';
@@ -738,25 +759,74 @@
         }
 
         function markWord(isRemembered) {
-            if (isRemembered) {
-                currentStudyPool.splice(currentWordIndex, 1);
-                lastShownIndex = -1; 
-            }
+            if (isRemembered) { currentStudyPool.splice(currentWordIndex, 1); lastShownIndex = -1; }
             nextRandomWord();
         }
 
-        // ฟังก์ชันอ่านออกเสียงภาษาจีน (Text to Speech)
-        function speakChinese() {
-            const word = document.getElementById('display-col1').innerText;
-            if (!word || word === '-') return;
-            
-            // ใช้ Web Speech API เพื่ออ่านออกเสียงเป็นภาษาจีนตัวย่อ (zh-CN)
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.lang = 'zh-CN'; 
-            utterance.rate = 0.9; // ปรับความเร็วให้อ่านช้าลงนิดนึงเพื่อให้ฟังง่าย
-            window.speechSynthesis.speak(utterance);
+        // ================= 2. Dictation Mode (ภารกิจแกะรอยเสียง / เขียนกระดาษ) =================
+        function startDictation() {
+            const chapterId = document.getElementById('chapterSelectDictation').value;
+            if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนเริ่มทำภารกิจวิจัย!' });
+
+            // คัดลอกคำศัพท์ทั้งหมดในเด็คมาใช้
+            dictationPool = appData.words.filter(w => w.chapterId === chapterId);
+            if (dictationPool.length === 0) return Swal.fire({ icon: 'warning', text: 'กล่องนี้ยังไม่มีข้อมูลคำศัพท์เลย!' });
+
+            // สลับคำแบบสุ่ม (Shuffle)
+            dictationPool = dictationPool.sort(() => Math.random() - 0.5);
+
+            document.getElementById('dictation-area').style.display = 'flex';
+            nextDictationWord();
         }
 
+        function nextDictationWord() {
+            if (dictationPool.length === 0) {
+                document.getElementById('dictation-area').style.display = 'none';
+                return Swal.fire({ icon: 'success', title: 'Mission Clear!', text: '🎉 ภารกิจสำเร็จ! ศาสตราจารย์ภูมิใจในตัวคุณมาก คุณถอดรหัสครบทุกคำแล้ว!' });
+            }
+
+            document.getElementById('dic-counter').innerText = `รอการวิจัย: ${dictationPool.length}`;
+            
+            // ซ่อนเฉลย และแสดงปุ่มสแกน
+            document.getElementById('dic-reveal-area').style.display = 'none';
+            document.getElementById('btn-reveal-dic').style.display = 'block';
+            document.getElementById('dic-action-buttons').style.display = 'none';
+            
+            // ดึงคำศัพท์ออกมา 1 คำ
+            currentDictWord = dictationPool[0];
+            const target = currentDictWord.col1 || currentDictWord.cn;
+            
+            // เตรียมข้อมูลสำหรับเฉลย
+            document.getElementById('dic-target-word').innerText = target;
+            document.getElementById('dic-col2').innerText = currentDictWord.col2 || currentDictWord.pin || '-';
+            document.getElementById('dic-col4').innerText = currentDictWord.col4 || currentDictWord.thMean || '-';
+            
+            // อ่านออกเสียงอัตโนมัติ 1 ครั้งเมื่อเริ่มคำใหม่
+            setTimeout(() => { speakChinese(target); }, 500);
+        }
+
+        function revealDictationAnswer() {
+            // แสดงเฉลย
+            document.getElementById('dic-reveal-area').style.display = 'block';
+            // ซ่อนปุ่มสแกน
+            document.getElementById('btn-reveal-dic').style.display = 'none';
+            // แสดงปุ่มให้ผู้เล่นกดตรวจตัวเอง
+            document.getElementById('dic-action-buttons').style.display = 'flex';
+        }
+
+        function markDictationWord(isCorrect) {
+            if (isCorrect) {
+                // เขียนถูก -> เอาคำนี้ออกจาก pool แล้วไปต่อ
+                dictationPool.shift(); 
+            } else {
+                // เขียนผิด -> ย้ายคำนี้ไปต่อท้ายคิว เพื่อให้วนกลับมาทำซ้ำ
+                const wrongWord = dictationPool.shift();
+                dictationPool.push(wrongWord);
+            }
+            nextDictationWord();
+        }
+
+        // Initialize
         updateDropdowns();
         addMultipleRows(5);
     </script>
