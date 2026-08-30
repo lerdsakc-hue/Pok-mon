@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Word - การ์ดคำศัพท์จีน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Noto+Serif+TC:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pk-blue: #3b4cca;
+            --pk-yellow: #ffde00;
+            --pk-red: #ff0000;
+            --pk-card-bg: #d1d5db;
+            --text-dark: #1f2937;
+        }
+
+        body {
+            font-family: 'Chakra Petch', sans-serif;
+            background-color: #f0f8ff;
+            background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
+            background-size: 30px 30px;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            background-color: var(--pk-red);
+            color: white;
+            text-align: center;
+            padding: 15px 0;
+            border-bottom: 8px solid #990000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 0 var(--pk-blue);
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 32px;
+            letter-spacing: 2px;
+            color: var(--pk-yellow);
+        }
+
+        .tabs {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        .tab-btn {
+            background-color: white;
+            color: var(--pk-blue);
+            border: 3px solid var(--pk-blue);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            transition: all 0.2s;
+            font-family: 'Chakra Petch', sans-serif;
+            box-shadow: 0 4px 0 var(--pk-blue);
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background-color: var(--pk-blue);
+            color: var(--pk-yellow);
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1e293b;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 900px;
+            margin: 20px auto;
+            display: none;
+        }
+        .container.active {
+            display: block;
+        }
+
+        .box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid var(--pk-blue);
+            box-shadow: 0 8px 0 rgba(59, 76, 202, 0.2);
+            margin-bottom: 25px;
+        }
+        .box h2 {
+            color: var(--pk-blue);
+            margin-top: 0;
+            border-bottom: 2px solid var(--pk-yellow);
+            padding-bottom: 10px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--pk-blue); }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            font-family: 'Chakra Petch', sans-serif;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--pk-blue);
+            box-shadow: 0 0 5px rgba(59, 76, 202, 0.4);
+        }
+
+        /* --- สไตล์ส่วนจัดการเด็ค (Deck List) --- */
+        .deck-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        .btn-del-deck {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Chakra Petch', sans-serif;
+            transition: background 0.2s;
+        }
+        .btn-del-deck:hover {
+            background-color: #dc2626;
+        }
+
+        /* --- ตารางกรอกคำศัพท์ (Admin Grid) --- */
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 2px solid var(--pk-blue);
+        }
+        .word-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            text-align: left;
+        }
+        .word-table th {
+            background-color: var(--pk-blue);
+            color: var(--pk-yellow);
+            padding: 12px 10px;
+            font-size: 15px;
+            border: 1px solid #2563eb;
+        }
+        .word-table td {
+            padding: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        .word-table input {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        .word-table input:focus {
+            background-color: #f0f9ff;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        button.btn-sec {
+            background-color: var(--pk-yellow);
+            color: var(--pk-blue);
+            border: 2px solid var(--pk-blue);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Chakra Petch', sans-serif;
+        }
+        button.btn-sec:hover { background-color: #fde047; }
+
+        button.btn-del-row {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button.btn-main {
+            background-color: var(--pk-red);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            font-family: 'Chakra Petch', sans-serif;
+            box-shadow: 0 4px 0 #990000;
+            transition: transform 0.1s;
+        }
+        button.btn-main:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #990000;
+        }
+
+        /* --- โหมดท่องจำ (Pokemon Card Style) --- */
+        #study-area { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .pkmn-card {
+            background-color: var(--pk-yellow);
+            padding: 12px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin-top: 15px;
+        }
+        
+        .pkmn-card-inner {
+            background: linear-gradient(135deg, #fca5a5 0%, #ef4444 100%);
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .pkmn-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .pkmn-image-box {
+            background: linear-gradient(180deg, #f3f4f6 0%, #d1d5db 100%);
+            border: 4px solid #d4af37;
+            border-radius: 5px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+        }
+
+        .chinese-char {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 90px;
+            color: #1f2937;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.8);
+        }
+
+        .pkmn-moves {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            border: 2px solid #ccc;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .translation-box {
+            display: none;
+            font-size: 16px;
+        }
+
+        .move-row {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding: 8px 0;
+        }
+        .move-row:last-child { border-bottom: none; }
+        .move-type {
+            background-color: var(--pk-blue);
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 12px;
+            margin-right: 10px;
+            min-width: 50px;
+            text-align: center;
+        }
+        .move-desc {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 380px;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Chakra Petch', sans-serif;
+            color: white;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 rgba(0,0,0,0);
+        }
+        
+        .btn-translate { background-color: var(--pk-blue); display: block; width: 100%;}
+        .btn-ok { background-color: #10b981; display: none; }
+        .btn-no { background-color: #ef4444; display: none; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🌟 Master Word</h1>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('study')">🎮 เข้าสู่การแบทเทิล</button>
+        <button class="tab-btn" onclick="switchTab('admin')">⚙️ จัดเด็คคำศัพท์ (Admin)</button>
+    </div>
+
+    <!-- ================= ส่วนของ Admin ================= -->
+    <div class="container" id="admin-container">
+        
+        <!-- สร้างและจัดการเด็ค -->
+        <div class="box">
+            <h2>📜 1. สร้างและจัดการเด็ค (บทเรียน)</h2>
+            <div class="form-group">
+                <input type="text" id="chapterName" placeholder="เช่น เด็คระดับ 1: การทักทาย">
+            </div>
+            <button class="btn-main" onclick="addChapter()">+ บันทึกเด็คใหม่</button>
+
+            <!-- แสดงรายการเด็คทั้งหมดพร้อมปุ่มลบ -->
+            <div style="margin-top: 25px;">
+                <label>📋 รายการเด็คทั้งหมดในระบบ:</label>
+                <div id="deckListAdmin">
+                    <!-- รายการเด็คจะถูกเพิ่มตรงนี้ -->
+                </div>
+            </div>
+        </div>
+
+        <!-- เพิ่มคำศัพท์แบบตาราง -->
+        <div class="box">
+            <h2>📊 2. ตารางเพิ่ม/แก้ไขคำศัพท์</h2>
+            
+            <div class="form-group">
+                <label>เลือกเด็คที่จะเพิ่มคำศัพท์:</label>
+                <select id="chapterSelectAdmin">
+                    <option value="">-- กรุณาเลือกเด็ค --</option>
+                </select>
+            </div>
+
+            <div class="table-actions">
+                <button class="btn-sec" onclick="addTableRow()">+ เพิ่ม 1 แถว</button>
+                <button class="btn-sec" onclick="addMultipleRows(5)">+ เพิ่ม 5 แถว</button>
+                <button class="btn-sec" onclick="clearEmptyRows()" style="background-color: #e2e8f0;">🧹 ลบแถวว่าง</button>
+            </div>
+
+            <p style="font-size: 13px; color: #64748b; margin-top: -5px;">💡 *ทิป: คุณสามารถคัดลอกข้อมูลจาก Google Sheets แล้ววาง (Ctrl+V) ใส่ช่อง "ตัวจีน" แถวไหนก็ได้ ข้อมูลจะจัดเข้าตารางให้อัตโนมัติ</p>
+
+            <div class="table-responsive">
+                <table class="word-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 23%;">ตัวจีนย่อ</th>
+                            <th style="width: 23%;">พินอิน (Pinyin)</th>
+                            <th style="width: 23%;">คำอ่านไทย</th>
+                            <th style="width: 23%;">คำแปล</th>
+                            <th style="width: 3%;">ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- แถวตารางจะถูกสร้างที่นี่ -->
+                    </tbody>
+                </table>
+            </div>
+
+            <button class="btn-main" onclick="saveTableWords()" style="width: 100%;">💾 บันทึกคำศัพท์ทั้งหมดในตาราง</button>
+        </div>
+    </div>
+
+    <!-- ================= ส่วนของการท่องจำ ================= -->
+    <div class="container active" id="study-container">
+        <div class="box">
+            <h2>🎒 เลือกเด็คที่จะใช้ฝึกฝน</h2>
+            <div class="form-group">
+                <select id="chapterSelectStudy">
+                    <option value="">-- กรุณาเลือกเด็ค --</option>
+                </select>
+            </div>
+            <button class="btn-main" onclick="startStudy()" style="width: 100%;">เริ่มฝึกฝน (Start Battle) 🚀</button>
+        </div>
+
+        <!-- กล่องแฟลชการ์ด (Pokemon Style) -->
+        <div id="study-area" style="display: none;">
+            
+            <div class="pkmn-card">
+                <div class="pkmn-card-inner">
+                    <div class="pkmn-card-header">
+                        <span>Basic Chinese</span>
+                        <span id="card-counter" style="font-size: 14px; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 10px;">เหลือ: 0</span>
+                    </div>
+
+                    <div class="pkmn-image-box">
+                        <div class="chinese-char" id="display-cn"></div>
+                    </div>
+
+                    <div class="pkmn-moves">
+                        <button id="btn-show-trans" class="action-btn btn-translate" onclick="showTranslation()">ใช้ท่าสแกน (ดูคำแปล)</button>
+                        
+                        <div class="translation-box" id="display-translation">
+                            <div class="move-row">
+                                <span class="move-type" style="background:#8b5cf6;">พินอิน</span>
+                                <span class="move-desc" id="display-pin"></span>
+                            </div>
+                            <div class="move-row">
+                                <span class="move-type" style="background:#3b82f6;">คำอ่าน</span>
+                                <span class="move-desc" id="display-thRead"></span>
+                            </div>
+                            <div class="move-row">
+                                <span class="move-type" style="background:#10b981;">คำแปล</span>
+                                <span class="move-desc" id="display-thMean"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn btn-ok" id="btn-ok" onclick="markWord(true)">จับสำเร็จ (จำได้)</button>
+                <button class="action-btn btn-no" id="btn-no" onclick="markWord(false)">หนีไป (จำไม่ได้)</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let appData = JSON.parse(localStorage.getItem('pkmnWordData')) || {
+            chapters: [],
+            words: []
+        };
+
+        let currentStudyPool = [];
+        let currentWordIndex = -1;
+        let lastShownIndex = -1;
+
+        function switchTab(tab) {
+            document.getElementById('admin-container').classList.remove('active');
+            document.getElementById('study-container').classList.remove('active');
+            document.querySelectorAll('.tab-btn')[0].classList.remove('active');
+            document.querySelectorAll('.tab-btn')[1].classList.remove('active');
+
+            if (tab === 'admin') {
+                document.getElementById('admin-container').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            } else {
+                document.getElementById('study-container').classList.add('active');
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                updateDropdowns(); 
+            }
+        }
+
+        // --- ระบบ Admin & สร้าง/ลบเด็ค ---
+        function addChapter() {
+            const chapterName = document.getElementById('chapterName').value.trim();
+            if (!chapterName) return alert('กรุณากรอกชื่อเด็ค (บทเรียน)');
+            
+            const newChapter = { id: Date.now().toString(), name: chapterName };
+            appData.chapters.push(newChapter);
+            saveData();
+            document.getElementById('chapterName').value = '';
+            updateDropdowns();
+            alert('สร้างเด็คสำเร็จ!');
+        }
+
+        function deleteChapter(chapterId, chapterName) {
+            if (confirm(`คุณต้องการลบเด็ค "${chapterName}" พร้อมคำศัพท์ทั้งหมดในเด็คนี้ใช่หรือไม่?`)) {
+                // ลบเด็ค
+                appData.chapters = appData.chapters.filter(ch => ch.id !== chapterId);
+                // ลบคำศัพท์ทั้งหมดที่อยู่ในเด็คนี้
+                appData.words = appData.words.filter(w => w.chapterId !== chapterId);
+                saveData();
+                updateDropdowns();
+                alert('ลบเด็คเรียบร้อยแล้ว!');
+            }
+        }
+
+        function updateDropdowns() {
+            const adminSelect = document.getElementById('chapterSelectAdmin');
+            const studySelect = document.getElementById('chapterSelectStudy');
+            const deckListAdmin = document.getElementById('deckListAdmin');
+            
+            adminSelect.innerHTML = '<option value="">-- กรุณาเลือกเด็ค --</option>';
+            studySelect.innerHTML = '<option value="">-- กรุณาเลือกเด็ค --</option>';
+            deckListAdmin.innerHTML = '';
+            
+            if (appData.chapters.length === 0) {
+                deckListAdmin.innerHTML = '<p style="color: #94a3b8; font-size: 14px; margin: 5px 0;">ยังไม่มีเด็คในระบบ</p>';
+            }
+
+            appData.chapters.forEach(ch => {
+                // อัปเดต Dropdown
+                adminSelect.innerHTML += `<option value="${ch.id}">${ch.name}</option>`;
+                studySelect.innerHTML += `<option value="${ch.id}">${ch.name}</option>`;
+                
+                // อัปเดต รายการเด็คพร้อมปุ่มลบในหน้า Admin
+                const wordCount = appData.words.filter(w => w.chapterId === ch.id).length;
+                const deckItem = document.createElement('div');
+                deckItem.className = 'deck-item';
+                deckItem.innerHTML = `
+                    <span><strong>${ch.name}</strong> <small style="color:#64748b;">(${wordCount} คำศัพท์)</small></span>
+                    <button class="btn-del-deck" onclick="deleteChapter('${ch.id}', '${ch.name}')">ลบเด็ค</button>
+                `;
+                deckListAdmin.appendChild(deckItem);
+            });
+        }
+
+        // --- เพิ่มคำศัพท์แบบตาราง ---
+        function addTableRow(cn = '', pin = '', thRead = '', thMean = '') {
+            const tbody = document.getElementById('tableBody');
+            const rowCount = tbody.children.length + 1;
+            const tr = document.createElement('tr');
+            
+            tr.innerHTML = `
+                <td style="text-align:center; color:#64748b; font-size:12px;">${rowCount}</td>
+                <td><input type="text" class="in-cn" value="${cn}" placeholder="你好" onpaste="handlePasteOnInput(event, this)"></td>
+                <td><input type="text" class="in-pin" value="${pin}" placeholder="nǐ hǎo"></td>
+                <td><input type="text" class="in-thRead" value="${thRead}" placeholder="หนีห่าว"></td>
+                <td><input type="text" class="in-thMean" value="${thMean}" placeholder="สวัสดี"></td>
+                <td style="text-align:center;"><button class="btn-del-row" onclick="removeRow(this)">✕</button></td>
+            `;
+            tbody.appendChild(tr);
+            updateRowNumbers();
+        }
+
+        function addMultipleRows(count) {
+            for(let i = 0; i < count; i++) {
+                addTableRow();
+            }
+        }
+
+        function removeRow(btn) {
+            const tr = btn.closest('tr');
+            tr.remove();
+            updateRowNumbers();
+        }
+
+        function updateRowNumbers() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach((row, index) => {
+                row.children[0].innerText = index + 1;
+            });
+        }
+
+        function clearEmptyRows() {
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(row => {
+                const cn = row.querySelector('.in-cn').value.trim();
+                const thMean = row.querySelector('.in-thMean').value.trim();
+                if (!cn && !thMean) {
+                    row.remove();
+                }
+            });
+            updateRowNumbers();
+        }
+
+        function handlePasteOnInput(e, inputElem) {
+            const clipboardData = (e.clipboardData || window.clipboardData).getData('text');
+            if (clipboardData && clipboardData.includes('\t')) {
+                e.preventDefault();
+                const lines = clipboardData.trim().split('\n');
+                const currentRow = inputElem.closest('tr');
+                let targetRow = currentRow;
+
+                lines.forEach((line, index) => {
+                    const cols = line.split('\t');
+                    if (cols.length >= 2) {
+                        if (!targetRow) {
+                            addTableRow(
+                                cols[0] ? cols[0].trim() : '',
+                                cols[1] ? cols[1].trim() : '',
+                                cols[2] ? cols[2].trim() : '',
+                                cols[3] ? cols[3].trim() : ''
+                            );
+                        } else {
+                            targetRow.querySelector('.in-cn').value = cols[0] ? cols[0].trim() : '';
+                            targetRow.querySelector('.in-pin').value = cols[1] ? cols[1].trim() : '';
+                            targetRow.querySelector('.in-thRead').value = cols[2] ? cols[2].trim() : '';
+                            targetRow.querySelector('.in-thMean').value = cols[3] ? cols[3].trim() : '';
+                            targetRow = targetRow.nextElementSibling;
+                        }
+                    }
+                });
+            }
+        }
+
+        function saveTableWords() {
+            const chapterId = document.getElementById('chapterSelectAdmin').value;
+            if (!chapterId) return alert('กรุณาเลือกเด็คก่อนบันทึกคำศัพท์');
+
+            const rows = document.querySelectorAll('#tableBody tr');
+            let savedCount = 0;
+
+            rows.forEach(row => {
+                const cn = row.querySelector('.in-cn').value.trim();
+                const pin = row.querySelector('.in-pin').value.trim();
+                const thRead = row.querySelector('.in-thRead').value.trim();
+                const thMean = row.querySelector('.in-thMean').value.trim();
+
+                if (cn && thMean) {
+                    appData.words.push({ chapterId, cn, pin, thRead, thMean });
+                    savedCount++;
+                }
+            });
+
+            if (savedCount > 0) {
+                saveData();
+                document.getElementById('tableBody').innerHTML = '';
+                addMultipleRows(3);
+                updateDropdowns(); // อัปเดตจำนวนคำศัพท์ในรายการเด็ค
+                alert(`✨ บันทึกคำศัพท์สำเร็จทั้งหมด ${savedCount} คำ!`);
+            } else {
+                alert('⚠️ กรุณากรอกตัวจีนและคำแปลอย่างน้อย 1 แถวในตาราง');
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('pkmnWordData', JSON.stringify(appData));
+        }
+
+        // --- ระบบแฟลชการ์ด (Battle Mode) ---
+        function startStudy() {
+            const chapterId = document.getElementById('chapterSelectStudy').value;
+            if (!chapterId) return alert('กรุณาเลือกเด็คที่ต้องการฝึกฝน');
+
+            currentStudyPool = appData.words.filter(w => w.chapterId === chapterId);
+            
+            if (currentStudyPool.length === 0) {
+                return alert('ยังไม่มีการ์ดคำศัพท์ในเด็คนี้');
+            }
+
+            document.getElementById('study-area').style.display = 'flex';
+            lastShownIndex = -1;
+            nextRandomWord();
+        }
+
+        function nextRandomWord() {
+            if (currentStudyPool.length === 0) {
+                document.getElementById('study-area').style.display = 'none';
+                alert('🏆 ยินดีด้วย! คุณจับโปเกมอน (คำศัพท์) ในเด็คนี้ได้ครบทุกตัวแล้ว!');
+                return;
+            }
+
+            document.getElementById('card-counter').innerText = `เหลือ: ${currentStudyPool.length}`;
+
+            let randIdx = Math.floor(Math.random() * currentStudyPool.length);
+            
+            if (currentStudyPool.length > 1 && randIdx === lastShownIndex) {
+                randIdx = (randIdx + 1) % currentStudyPool.length;
+            }
+            
+            currentWordIndex = randIdx;
+            lastShownIndex = currentWordIndex;
+            const word = currentStudyPool[currentWordIndex];
+
+            document.getElementById('display-cn').innerText = word.cn;
+            document.getElementById('display-pin').innerText = word.pin;
+            document.getElementById('display-thRead').innerText = word.thRead;
+            document.getElementById('display-thMean').innerText = word.thMean;
+            
+            document.getElementById('display-translation').style.display = 'none';
+            document.getElementById('btn-show-trans').style.display = 'block';
+            document.getElementById('btn-ok').style.display = 'none';
+            document.getElementById('btn-no').style.display = 'none';
+        }
+
+        function showTranslation() {
+            document.getElementById('display-translation').style.display = 'block';
+            document.getElementById('btn-show-trans').style.display = 'none';
+            document.getElementById('btn-ok').style.display = 'block';
+            document.getElementById('btn-no').style.display = 'block';
+        }
+
+        function markWord(isRemembered) {
+            if (isRemembered) {
+                currentStudyPool.splice(currentWordIndex, 1);
+                lastShownIndex = -1; 
+            }
+            nextRandomWord();
+        }
+
+        // เริ่มต้นการทำงาน
+        updateDropdowns();
+        addMultipleRows(5);
+    </script>
+</body>
+</html>
