@@ -20,7 +20,14 @@ header h1{margin:0;font-size:36px;letter-spacing:2px;color:var(--pk-yellow);text
 .tab-btn{background-color:#fff;color:var(--pk-blue);border:3px solid var(--pk-blue);padding:10px 15px;cursor:pointer;font-size:16px;font-weight:bold;border-radius:25px;transition:all .2s;font-family:'Chakra Petch',sans-serif;box-shadow:0 4px 0 var(--pk-blue)}
 .tab-btn.active,.tab-btn:hover{background-color:var(--pk-blue);color:var(--pk-yellow);transform:translateY(2px);box-shadow:0 2px 0 #1e293b}
 .zoom-bar{margin-top:15px;display:flex;gap:8px;align-items:center;justify-content:center;background:#fff;border:3px solid var(--pk-blue);border-radius:25px;padding:6px 14px;font-weight:bold;color:var(--pk-blue)}
-.zoom-bar input{width:140px;padding:0}
+.zoom-bar input{width:110px;padding:0}
+.tool-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;margin-top:15px;padding:0 8px}
+.tool-row .zoom-bar{margin-top:0}
+.py-sec{text-align:left;margin:12px 0 4px;font-weight:bold;color:var(--pk-blue);font-size:15px}
+.py-grid{display:flex;flex-wrap:wrap;gap:6px}
+.py-chip{border:2px solid var(--pk-blue);background:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-family:inherit;font-size:18px;font-weight:bold;color:var(--pk-red);min-width:48px}
+.py-chip small{display:block;font-size:13px;color:#475569;font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif}
+.py-chip:hover{background:#eef2ff}
 .zoom-bar button{background:var(--pk-yellow);border:2px solid #d4af37;border-radius:6px;font-weight:bold;cursor:pointer;padding:4px 10px;font-family:inherit}
 
 /* เตรียมสอบ */
@@ -128,6 +135,7 @@ button.btn-main:active{transform:translateY(4px);box-shadow:none}
     <button class="tab-btn" onclick="switchTab('exam')">🎓 เตรียมสอบ</button>
     <button class="tab-btn" onclick="switchTab('admin')">⚙️ จัดการ PC Box</button>
 </div>
+<div class="tool-row">
 <div class="zoom-bar">
     <span>🔠 ขนาดตัวจีน</span>
     <button onclick="setZh(-0.1)">A−</button>
@@ -135,13 +143,15 @@ button.btn-main:active{transform:translateY(4px);box-shadow:none}
     <button onclick="setZh(0.1)">A+</button>
     <span id="zhVal">100%</span>
 </div>
-<div class="zoom-bar" style="margin-top:8px;flex-wrap:wrap;">
+<div class="zoom-bar">
     <span>🔊 เสียง</span>
-    <select id="voiceSel" style="width:auto;max-width:200px;padding:4px;font-size:14px;" onchange="saveTts()"></select>
+    <select id="voiceSel" style="width:auto;max-width:170px;padding:4px;font-size:14px;" onchange="saveTts()"></select>
     <select id="rateSel" style="width:auto;padding:4px;font-size:14px;" onchange="saveTts()">
         <option value="0.6">ช้ามาก</option><option value="0.75">ช้า</option><option value="0.9" selected>ปกติ</option><option value="1.05">เร็ว</option>
     </select>
     <button onclick="speakChinese('你好，我是学生。')">ทดสอบ</button>
+</div>
+<div class="zoom-bar"><span>🔤 พินอิน</span><button onclick="showPinyin()">พยัญชนะ/สระ</button></div>
 </div>
 
 <!-- 1. แบทเทิล -->
@@ -755,6 +765,37 @@ function speakChinese(t, queue) {
 try { const r = localStorage.getItem('pkmnTtsRate'); if (r) document.getElementById('rateSel').value = r; } catch (e) {}
 loadVoices();
 if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = loadVoices;
+
+
+// ===== ตารางพินอิน: พยัญชนะ (声母) / สระ (韵母) =====
+const PY_INITIALS = [
+    ['ริมฝีปาก', [['b','波','ป ไม่พ่นลม'],['p','坡','พ พ่นลม'],['m','摸','ม'],['f','佛','ฟ']]],
+    ['ปลายลิ้น', [['d','得','ต ไม่พ่นลม'],['t','特','ท พ่นลม'],['n','讷','น'],['l','勒','ล']]],
+    ['โคนลิ้น', [['g','哥','ก ไม่พ่นลม'],['k','科','ค พ่นลม'],['h','喝','ฮ/ห']]],
+    ['เพดานแข็ง', [['j','基','จ ไม่พ่นลม'],['q','欺','ฉ พ่นลม'],['x','希','ซี (ลิ้นแบน)']]],
+    ['ลิ้นม้วน', [['zh','知','จร'],['ch','吃','ชร'],['sh','诗','ชร (เสียดแทรก)'],['r','日','ร (ลิ้นม้วน)']]],
+    ['ปลายลิ้น-ฟัน', [['z','资','ตซ'],['c','雌','ทซ'],['s','思','ซ']]],
+    ['กึ่งสระ', [['y','衣','ย'],['w','乌','ว']]]
+];
+const PY_FINALS = [
+    ['สระเดี่ยว', [['a','啊'],['o','喔'],['e','鹅'],['i','衣'],['u','乌'],['ü','迂'],['er','儿']]],
+    ['สระประสม', [['ai','爱'],['ei','诶'],['ao','熬'],['ou','欧']]],
+    ['ตัวสะกด n / ng', [['an','安'],['en','恩'],['ang','昂'],['eng','亨'],['ong','轰']]],
+    ['ขึ้นต้น i', [['ia','呀'],['ie','耶'],['iao','腰'],['iu','优'],['ian','烟'],['in','因'],['iang','央'],['ing','英'],['iong','拥']]],
+    ['ขึ้นต้น u', [['ua','蛙'],['uo','窝'],['uai','歪'],['ui','威'],['uan','弯'],['un','温'],['uang','汪'],['ueng','翁']]],
+    ['ขึ้นต้น ü', [['üe','约'],['üan','冤'],['ün','晕']]]
+];
+function speakPy(ch) { speakChinese(ch); }
+function showPinyin() {
+    const chip = ([l, ch, hint]) => '<button class="py-chip" onclick="speakPy(\'' + ch + '\')">' + l + '<small>' + ch + (hint ? ' · ' + hint : '') + '</small></button>';
+    let h = '<div style="max-height:62vh;overflow-y:auto;padding-right:4px;">';
+    h += '<div class="py-sec" style="font-size:18px;">พยัญชนะ 声母 (21 ตัว + y, w)</div>';
+    PY_INITIALS.forEach(([g, list]) => { h += '<div class="py-sec">' + g + '</div><div class="py-grid">' + list.map(chip).join('') + '</div>'; });
+    h += '<div class="py-sec" style="font-size:18px;margin-top:20px;">สระ 韵母</div>';
+    PY_FINALS.forEach(([g, list]) => { h += '<div class="py-sec">' + g + '</div><div class="py-grid">' + list.map(chip).join('') + '</div>'; });
+    h += '<div class="info-box" style="margin-top:16px;text-align:left;">แตะที่ปุ่มเพื่อฟังเสียง (อ่านจากตัวอย่างอักษรจีนใต้ตัวพินอิน)<br>j / q / x / y ตามด้วย ü จะเขียนเป็น u เช่น 去 qù, 鱼 yú<br>ป = ไม่พ่นลม (b d g j zh z) / พ = พ่นลม (p t k q ch c)</div></div>';
+    Swal.fire({ title: '🔤 พินอิน', html: h, width: 720, confirmButtonText: 'ปิด' });
+}
 
 // ===== 1. Battle Mode =====
 function startStudy() {
