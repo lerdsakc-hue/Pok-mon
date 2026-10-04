@@ -135,6 +135,14 @@ button.btn-main:active{transform:translateY(4px);box-shadow:none}
     <button onclick="setZh(0.1)">A+</button>
     <span id="zhVal">100%</span>
 </div>
+<div class="zoom-bar" style="margin-top:8px;flex-wrap:wrap;">
+    <span>🔊 เสียง</span>
+    <select id="voiceSel" style="width:auto;max-width:200px;padding:4px;font-size:14px;" onchange="saveTts()"></select>
+    <select id="rateSel" style="width:auto;padding:4px;font-size:14px;" onchange="saveTts()">
+        <option value="0.6">ช้ามาก</option><option value="0.75">ช้า</option><option value="0.9" selected>ปกติ</option><option value="1.05">เร็ว</option>
+    </select>
+    <button onclick="speakChinese('你好，我是学生。')">ทดสอบ</button>
+</div>
 
 <!-- 1. แบทเทิล -->
 <div class="container active" id="study-container">
@@ -605,7 +613,7 @@ function renderSentences() {
         say.addEventListener('click', e => {
             e.stopPropagation();
             window.speechSynthesis.cancel();
-            setTimeout(() => { lines.forEach(l => { if (hasZh(l.zh)) speakChinese(l.zh); }); }, 150);
+            setTimeout(() => { lines.forEach(l => { if (hasZh(l.zh)) speakChinese(l.zh, true); }); }, 150);
         });
         tools.appendChild(say);
         card.appendChild(tools);
@@ -702,12 +710,51 @@ function saveTableWords() {
 function saveData() { try { localStorage.setItem('pkmnWordData', JSON.stringify(appData)); } catch (e) {} }
 
 // ===== TTS =====
-function speakChinese(t) {
-    if (!t || t === '-') return;
-    const u = new SpeechSynthesisUtterance(t);
-    u.lang = 'zh-CN'; u.rate = 0.85;
-    window.speechSynthesis.speak(u);
+let zhVoices = [];
+function loadVoices() {
+    const all = (window.speechSynthesis.getVoices && window.speechSynthesis.getVoices()) || [];
+    const norm = v => v.lang.replace('_', '-').toLowerCase();
+    zhVoices = all.filter(v => /^zh/.test(norm(v)));
+    const score = v => {
+        const l = norm(v); let sc = 0;
+        if (l === 'zh-cn') sc += 10; else if (l.startsWith('zh-hans')) sc += 9; else if (l === 'zh-tw') sc += 3; else sc += 2;
+        if (/natural|online|neural|xiao|yun|google|ting|meijia|lilian|yaoyao|huihui|kangkang|li-mu|lili/i.test(v.name)) sc += 5;
+        if (v.localService === false) sc += 1;
+        return sc;
+    };
+    zhVoices.sort((a, b) => score(b) - score(a));
+    const sel = document.getElementById('voiceSel');
+    let saved = ''; try { saved = localStorage.getItem('pkmnTtsVoice') || ''; } catch (e) {}
+    sel.innerHTML = '';
+    if (!zhVoices.length) {
+        const o = document.createElement('option'); o.value = ''; o.textContent = 'อัตโนมัติ (ไม่พบเสียงจีน)'; sel.appendChild(o);
+    } else {
+        zhVoices.forEach(v => { const o = document.createElement('option'); o.value = v.name; o.textContent = v.name + ' (' + v.lang + ')'; sel.appendChild(o); });
+        if (zhVoices.some(v => v.name === saved)) sel.value = saved;
+    }
 }
+function saveTts() {
+    try {
+        localStorage.setItem('pkmnTtsVoice', document.getElementById('voiceSel').value);
+        localStorage.setItem('pkmnTtsRate', document.getElementById('rateSel').value);
+    } catch (e) {}
+    speakChinese('你好');
+}
+function speakChinese(t, queue) {
+    if (!t || t === '-' || !window.speechSynthesis) return;
+    const synth = window.speechSynthesis;
+    if (!queue) synth.cancel();
+    if (synth.paused) synth.resume();
+    const u = new SpeechSynthesisUtterance(t);
+    const v = zhVoices.find(x => x.name === document.getElementById('voiceSel').value) || zhVoices[0];
+    if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'zh-CN'; }
+    u.rate = parseFloat(document.getElementById('rateSel').value) || 0.9;
+    u.pitch = 1; u.volume = 1;
+    synth.speak(u);
+}
+try { const r = localStorage.getItem('pkmnTtsRate'); if (r) document.getElementById('rateSel').value = r; } catch (e) {}
+loadVoices();
+if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = loadVoices;
 
 // ===== 1. Battle Mode =====
 function startStudy() {
@@ -944,12 +991,24 @@ function runQuiz(items, regen) {
                 if (!right) Array.from(optBox.children).forEach(x => { if (x.textContent === it.answer) x.classList.add('ok'); });
                 fb.textContent = (right ? '✅ ถูกต้อง! ' : '❌ ผิด (จะวนมาถามใหม่) ') + (it.why || '');
                 fb.style.display = 'block';
+                if (it.info) {
+                    infoBox.innerHTML = '';
+                    it.info.forEach(([l, v]) => {
+                        const r = mkEl('div', 'data-row');
+                        r.appendChild(mkEl('span', 'data-label', l));
+                        r.appendChild(mkEl('span', 'data-val zh', v));
+                        infoBox.appendChild(r);
+                    });
+                    infoBox.style.display = 'block';
+                }
                 next.style.display = 'block';
                 if (right) { queue.shift(); done++; } else { queue.push(queue.shift()); }
             });
             optBox.appendChild(b);
         });
-        sc.appendChild(optBox); sc.appendChild(fb);
+        const infoBox = mkEl('div');
+        infoBox.style.cssText = 'display:none;margin-top:10px;width:100%;text-align:left;';
+        sc.appendChild(optBox); sc.appendChild(fb); sc.appendChild(infoBox);
         ctl.appendChild(next);
     }
     show();
@@ -1119,12 +1178,14 @@ const YI_ITEMS = [
     ['一会儿', 'yí huìr', 'yí', 'ตัวถัดไป (会) เสียง 4 → yí'],
     ['一', 'yī', 'yī', 'ออกเสียงเดี่ยว / นับเลข → yī']
 ];
+const YI_TH = {'一个':'หนึ่งอัน/หนึ่งชิ้น','一天':'หนึ่งวัน','一起':'ด้วยกัน','一年':'หนึ่งปี','第一':'ที่หนึ่ง','星期一':'วันจันทร์','一月':'เดือนมกราคม','一号':'วันที่ 1','十一':'สิบเอ็ด (11)','一点':'นิดหน่อย','一块':'หนึ่งหยวน / หนึ่งก้อน','一下':'สักครู่ / ลอง...ดู','一些':'บ้าง / ไม่กี่...','一杯':'หนึ่งแก้ว','一共':'รวมทั้งหมด','一直':'ตลอด / ตรงไป','一定':'แน่นอน / ต้อง','一样':'เหมือนกัน','一半':'ครึ่งหนึ่ง','一本':'หนึ่งเล่ม','一件':'หนึ่งตัว / หนึ่งชิ้น (เสื้อ, เรื่อง)','一次':'หนึ่งครั้ง','一百':'หนึ่งร้อย','一会儿':'สักครู่','一':'หนึ่ง'};
 function examYi() {
     setExamInfo('หลักการผันเสียงของ 一:\n• ตามด้วยเสียง 4 → yí   • ตามด้วยเสียง 1, 2, 3 → yì\n• อยู่ท้ายคำ / ลำดับที่ / วันที่-เดือน / นับเลข → yī\nแถม: 不 ก็ผันเสียงคล้ายกัน ตามด้วยเสียง 4 → bú เช่น 不是 bú shì');
     const go = () => {
         runQuiz(shuffleArr(YI_ITEMS).slice(0, 10).map(([zh, full, ans, why]) => ({
             main: zh, sub: 'ออกเสียง 一 ในคำนี้ว่าอย่างไร?', speak: zh,
-            options: ['yī', 'yí', 'yì'], answer: ans, why: zh + ' = ' + full + ' (' + why + ')'
+            options: ['yī', 'yí', 'yì'], answer: ans, why: '(' + why + ')',
+            info: [['คำอ่าน', zh + '  =  ' + full], ['คำแปล', YI_TH[zh] || '-']]
         })), go);
     };
     addExamButton('🔄 เริ่มชุดใหม่', go);
