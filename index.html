@@ -1,1797 +1,1259 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>PokeWord Master - แฟลชการ์ดคำศัพท์</title>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PokeWord Master - แฟลชการ์ดคำศัพท์</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+:root{--pk-blue:#3b4cca;--pk-yellow:#ffcb05;--pk-red:#cc0000;--pk-dark:#1a1a1a;--pokedex-red:#dd2020;--screen-bg:#98fb98;--zh-scale:1;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{font-family:'Chakra Petch',sans-serif;background-color:#f0f8ff;background-image:linear-gradient(rgba(59,76,202,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(59,76,202,.1) 1px,transparent 1px);background-size:20px 20px;color:var(--pk-dark);margin:0;padding:0;display:flex;flex-direction:column;align-items:center}
+.swal2-popup{font-family:'Chakra Petch',sans-serif!important;border:4px solid var(--pk-blue)!important;border-radius:15px!important}
+.swal2-title{color:var(--pk-blue)!important}
+.swal2-confirm{background-color:var(--pk-blue)!important;border-radius:8px!important;font-weight:bold!important}
+.swal2-cancel{border-radius:8px!important}
+header{width:100%;background-color:var(--pk-red);color:#fff;text-align:center;padding:15px 0;border-bottom:8px solid #8b0000;box-shadow:0 4px 10px rgba(0,0,0,.3)}
+header h1{margin:0;font-size:36px;letter-spacing:2px;color:var(--pk-yellow);text-shadow:3px 3px 0 var(--pk-blue),-1px -1px 0 var(--pk-blue),1px -1px 0 var(--pk-blue),-1px 1px 0 var(--pk-blue),1px 1px 0 var(--pk-blue)}
+.tabs{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.tab-btn{background-color:#fff;color:var(--pk-blue);border:3px solid var(--pk-blue);padding:10px 15px;cursor:pointer;font-size:16px;font-weight:bold;border-radius:25px;transition:all .2s;font-family:'Chakra Petch',sans-serif;box-shadow:0 4px 0 var(--pk-blue)}
+.tab-btn.active,.tab-btn:hover{background-color:var(--pk-blue);color:var(--pk-yellow);transform:translateY(2px);box-shadow:0 2px 0 #1e293b}
+.zoom-bar{margin-top:15px;display:flex;gap:8px;align-items:center;justify-content:center;background:#fff;border:3px solid var(--pk-blue);border-radius:25px;padding:6px 14px;font-weight:bold;color:var(--pk-blue)}
+.zoom-bar input{width:140px;padding:0}
+.zoom-bar button{background:var(--pk-yellow);border:2px solid #d4af37;border-radius:6px;font-weight:bold;cursor:pointer;padding:4px 10px;font-family:inherit}
 
-    <style>
-        :root {
-            --pk-blue: #3b4cca;
-            --pk-yellow: #ffcb05;
-            --pk-red: #cc0000;
-            --pk-dark: #1a1a1a;
-            --pokedex-red: #dd2020;
-            --screen-bg: #98fb98;
-        }
+/* เตรียมสอบ */
+.zh{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei','Heiti SC',sans-serif}
+.exam-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.exam-card{background:#f8fafc;border:3px solid var(--pk-blue);border-radius:12px;padding:14px;cursor:pointer;text-align:left;font-family:inherit;box-shadow:0 4px 0 rgba(59,76,202,.25)}
+.exam-card:hover{background:#eef2ff}
+.exam-card .no{background:var(--pk-yellow);color:var(--pk-dark);border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;margin-right:8px}
+.exam-card b{color:var(--pk-blue);font-size:16px}
+.exam-card small{display:block;margin-top:6px;color:#475569;font-size:14px}
+.info-box{background:#fffbeb;border:2px solid #fde047;border-radius:10px;padding:10px 14px;font-size:15px;margin-bottom:14px;line-height:1.7}
+.ws-score{font-weight:bold;color:var(--pk-blue);margin:10px 0}
+.ws-sub{color:#475569;font-size:15px}
+.ans-zh{font-size:calc(30px*var(--zh-scale));font-weight:bold;color:var(--pk-red)}
+.ans-py{color:var(--pk-blue);font-weight:600;font-size:18px}
+.ans-th{color:#333;font-size:16px}
+.quiz-opt{padding:12px 22px;font-size:calc(24px*var(--zh-scale));border:3px solid var(--pk-blue);background:#fff;border-radius:10px;cursor:pointer;font-family:'Noto Sans SC','Chakra Petch',sans-serif;font-weight:bold;margin:4px;color:var(--pk-blue)}
+.quiz-opt.ok{background:#bbf7d0;border-color:#16a34a}
+.quiz-opt.bad{background:#fecaca;border-color:#dc2626}
+.chip{padding:8px 14px;font-size:calc(24px*var(--zh-scale));border:2px solid var(--pk-blue);border-radius:8px;background:#fff;cursor:pointer;margin:4px;color:var(--pk-dark)}
+.answer-zone{min-height:60px;border:3px dashed #555;border-radius:10px;padding:8px;margin:10px 0;background:rgba(255,255,255,.5);width:100%;box-sizing:border-box}
 
-        :root { color-scheme: light; box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
-        html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+/* ประโยค */
+.sent-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.sent-row>div{flex:1;min-width:130px}
+textarea.sent-ta{width:100%;box-sizing:border-box;min-height:130px;padding:10px;border:2px solid #ccc;border-radius:8px;font-size:14px;font-family:'Chakra Petch',sans-serif;margin-bottom:10px}
+.sent-card{background:#f8fafc;border:2px solid #cbd5e1;border-radius:10px;padding:12px 15px;margin-top:10px;position:relative}
+.sent-zh{font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei','Heiti SC',sans-serif;font-size:calc(28px*var(--zh-scale));font-weight:bold;color:var(--pk-red);line-height:1.3}
+.sent-pin{color:var(--pk-blue);font-weight:600;font-size:16px}
+.sent-th{color:#333;font-size:16px}
+.sent-line{margin-top:10px;padding-top:8px;border-top:1px dashed #cbd5e1}
+.sent-line:first-of-type{border-top:none}
+.sent-spk{display:inline-block;background:var(--pk-blue);color:#fff;border-radius:4px;padding:0 8px;font-size:13px;margin-right:8px;vertical-align:middle}
+.sent-title{font-weight:bold;color:var(--pk-blue);margin-bottom:4px}
+.sent-tools{margin-top:10px;display:flex;gap:8px}
+.sent-del{position:absolute;top:8px;right:8px;background:transparent;border:none;color:#94a3b8;cursor:pointer;font-size:18px}
+.hide-trans .sent-card:not(.show) .sent-pin,.hide-trans .sent-card:not(.show) .sent-th{display:none}
+.hide-trans .sent-card{cursor:pointer}
 
-        body {
-            font-family: 'Chakra Petch', sans-serif;
-            background-color: #f0f8ff;
-            background-image: 
-                linear-gradient(rgba(59, 76, 202, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(59, 76, 202, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            color: var(--pk-dark);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+/* ตาราง */
+.view-table td{padding:10px 12px;font-size:17px;vertical-align:middle}
+.view-table tbody tr:nth-child(even){background-color:#f8fafc}
+.view-table td.zh{font-size:calc(52px*var(--zh-scale));font-weight:bold;color:var(--pk-red);white-space:nowrap;line-height:1.2}
+.view-table td.pin{color:var(--pk-blue);font-weight:600;font-size:20px}
+.view-table .btn-say{background-color:var(--pk-blue);color:#fff;border:none;border-radius:20px;padding:6px 12px;cursor:pointer;font-size:16px}
 
-        /* SweetAlert2 Theme */
-        .swal2-popup {
-            font-family: 'Chakra Petch', sans-serif !important;
-            border: 4px solid var(--pk-blue) !important;
-            border-radius: 15px !important;
-        }
-        .swal2-title { color: var(--pk-blue) !important; }
-        .swal2-confirm {
-            background-color: var(--pk-blue) !important;
-            border-radius: 8px !important;
-            font-weight: bold !important;
-        }
-        .swal2-cancel { border-radius: 8px !important; }
-        .swal2-confirm.btn-danger { background-color: var(--pk-red) !important; }
+.container{width:95%;max-width:900px;margin:20px auto;display:none}
+.container.active{display:block}
+.box{background:#fff;padding:25px;border-radius:15px;border:3px solid var(--pk-blue);box-shadow:0 8px 0 rgba(59,76,202,.2);margin-bottom:25px}
+.box h2{color:var(--pk-blue);margin-top:0;border-bottom:3px solid var(--pk-yellow);padding-bottom:10px;display:flex;align-items:center;gap:10px}
+.form-group{margin-bottom:15px}
+label{display:block;font-weight:bold;margin-bottom:5px;color:var(--pk-blue)}
+input,select{width:100%;padding:10px;border:2px solid #ccc;border-radius:8px;font-size:16px;box-sizing:border-box;font-family:'Chakra Petch',sans-serif}
+input:focus,select:focus{outline:none;border-color:var(--pk-blue);box-shadow:0 0 5px rgba(59,76,202,.4)}
+.deck-item{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background-color:#f8fafc;border:2px solid #cbd5e1;border-radius:10px;margin-top:8px;font-size:16px}
+.btn-del-deck{background-color:var(--pk-red);color:#fff;border:none;padding:6px 15px;border-radius:6px;cursor:pointer;font-weight:bold;font-family:'Chakra Petch',sans-serif;box-shadow:0 2px 0 #8b0000}
+.btn-del-deck:active{transform:translateY(2px);box-shadow:none}
+.table-responsive{overflow-x:auto;margin-bottom:15px;border-radius:8px;border:2px solid var(--pk-blue)}
+.word-table{width:100%;border-collapse:collapse;background-color:#fff;text-align:left}
+.word-table th{background-color:var(--pk-blue);color:var(--pk-yellow);padding:12px 10px;font-size:15px;border:1px solid #2563eb;white-space:nowrap}
+.word-table td{padding:6px;border:1px solid #e2e8f0}
+.word-table input{border:1px solid #cbd5e1;padding:8px;font-size:14px;border-radius:4px}
+.word-table input:focus{background-color:#fffbeb}
+.table-actions{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+button.btn-sec{background-color:var(--pk-yellow);color:var(--pk-dark);border:2px solid #d4af37;padding:8px 15px;border-radius:6px;cursor:pointer;font-weight:bold;font-family:'Chakra Petch',sans-serif}
+button.btn-sec:hover{background-color:#fde047}
+button.btn-del-row{background-color:var(--pk-red);color:#fff;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:14px}
+button.btn-main{background-color:var(--pk-blue);color:var(--pk-yellow);border:none;padding:12px 20px;border-radius:8px;cursor:pointer;font-size:18px;font-weight:bold;font-family:'Chakra Petch',sans-serif;box-shadow:0 4px 0 #1e3a8a;transition:transform .1s}
+button.btn-main:active{transform:translateY(4px);box-shadow:none}
 
-        header {
-            width: 100%;
-            background-color: var(--pk-red);
-            color: white;
-            text-align: center;
-            padding: 15px 0;
-            border-bottom: 8px solid #8b0000;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        
-        header h1 {
-            margin: 0;
-            font-size: 36px;
-            letter-spacing: 2px;
-            color: var(--pk-yellow);
-            text-shadow: 3px 3px 0 var(--pk-blue), -1px -1px 0 var(--pk-blue), 1px -1px 0 var(--pk-blue), -1px 1px 0 var(--pk-blue), 1px 1px 0 var(--pk-blue);
-        }
-
-        .tabs {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .tab-btn {
-            background-color: white;
-            color: var(--pk-blue);
-            border: 3px solid var(--pk-blue);
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 25px;
-            transition: all 0.2s;
-            font-family: 'Chakra Petch', sans-serif;
-            box-shadow: 0 4px 0 var(--pk-blue);
-        }
-        .tab-btn.active, .tab-btn:hover {
-            background-color: var(--pk-blue);
-            color: var(--pk-yellow);
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #1e293b;
-        }
-
-
-        /* ===== โหมดเตรียมสอบ ===== */
-        .zh { font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Heiti SC', sans-serif; }
-        .exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
-        .exam-card {
-            background: #f8fafc; border: 3px solid var(--pk-blue); border-radius: 12px; padding: 14px;
-            cursor: pointer; text-align: left; font-family: inherit; box-shadow: 0 4px 0 rgba(59,76,202,0.25);
-        }
-        .exam-card:hover { background: #eef2ff; }
-        .exam-card .no {
-            background: var(--pk-yellow); color: var(--pk-dark); border-radius: 50%; width: 28px; height: 28px;
-            display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 8px;
-        }
-        .exam-card b { color: var(--pk-blue); font-size: 16px; }
-        .exam-card small { display: block; margin-top: 6px; color: #475569; font-size: 14px; }
-        .info-box {
-            background: #fffbeb; border: 2px solid #fde047; border-radius: 10px;
-            padding: 10px 14px; font-size: 15px; margin-bottom: 14px; line-height: 1.7;
-        }
-        .ws-score { font-weight: bold; color: var(--pk-blue); margin: 10px 0; }
-        .ws-main { font-size: 34px; font-weight: bold; color: var(--pk-red); line-height: 1.3; }
-        .ws-sub { color: #475569; font-size: 15px; }
-        .ws-ans { display: none; margin-top: 10px; padding-top: 8px; border-top: 2px dashed #cbd5e1; }
-        .ws-item.open .ws-ans { display: block; }
-        .ws-mark { display: none; gap: 8px; margin-top: 10px; }
-        .ws-item.open .ws-mark { display: flex; }
-        .ws-mark button.on-ok { background-color: #22c55e; color: white; border-color: #16a34a; }
-        .ws-mark button.on-no { background-color: #ef4444; color: white; border-color: #b91c1c; }
-        .ans-zh { font-size: 30px; font-weight: bold; color: var(--pk-red); }
-        .ans-py { color: var(--pk-blue); font-weight: 600; font-size: 18px; }
-        .ans-th { color: #333; font-size: 16px; }
-        .quiz-opt {
-            padding: 12px 22px; font-size: 24px; border: 3px solid var(--pk-blue); background: white;
-            border-radius: 10px; cursor: pointer; font-family: 'Noto Sans SC', 'Chakra Petch', sans-serif;
-            font-weight: bold; margin: 4px; color: var(--pk-blue);
-        }
-        .quiz-opt.ok { background: #bbf7d0; border-color: #16a34a; }
-        .quiz-opt.bad { background: #fecaca; border-color: #dc2626; }
-        .chip {
-            padding: 8px 14px; font-size: 24px; border: 2px solid var(--pk-blue); border-radius: 8px;
-            background: white; cursor: pointer; margin: 4px; color: var(--pk-dark);
-        }
-        .answer-zone {
-            min-height: 60px; border: 3px dashed #94a3b8; border-radius: 10px;
-            padding: 8px; margin: 10px 0; background: #f8fafc;
-        }
-
-        /* ===== โหมดแต่งประโยค/บทสนทนา ===== */
-        .sent-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
-        .sent-row > div { flex: 1; min-width: 130px; }
-        textarea.sent-ta {
-            width: 100%; box-sizing: border-box; min-height: 130px; padding: 10px;
-            border: 2px solid #ccc; border-radius: 8px; font-size: 14px;
-            font-family: 'Chakra Petch', sans-serif; margin-bottom: 10px;
-        }
-        .sent-card {
-            background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 10px;
-            padding: 12px 15px; margin-top: 10px; position: relative;
-        }
-        .sent-zh {
-            font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Heiti SC', sans-serif;
-            font-size: 28px; font-weight: bold; color: var(--pk-red); line-height: 1.3;
-        }
-        .sent-pin { color: var(--pk-blue); font-weight: 600; font-size: 16px; }
-        .sent-th { color: #333; font-size: 16px; }
-        .sent-line { margin-top: 10px; padding-top: 8px; border-top: 1px dashed #cbd5e1; }
-        .sent-line:first-of-type { border-top: none; }
-        .sent-spk {
-            display: inline-block; background: var(--pk-blue); color: white; border-radius: 4px;
-            padding: 0 8px; font-size: 13px; margin-right: 8px; vertical-align: middle;
-        }
-        .sent-title { font-weight: bold; color: var(--pk-blue); margin-bottom: 4px; }
-        .sent-tools { margin-top: 10px; display: flex; gap: 8px; }
-        .sent-del {
-            position: absolute; top: 8px; right: 8px; background: transparent; border: none;
-            color: #94a3b8; cursor: pointer; font-size: 18px;
-        }
-        .hide-trans .sent-card:not(.show) .sent-pin,
-        .hide-trans .sent-card:not(.show) .sent-th { display: none; }
-        .hide-trans .sent-card { cursor: pointer; }
-
-        /* ===== โหมดตารางคำศัพท์ ===== */
-        .view-table td { padding: 10px 12px; font-size: 17px; vertical-align: middle; }
-        .view-table tbody tr:nth-child(even) { background-color: #f8fafc; }
-        .view-table td.zh {
-            font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Heiti SC', sans-serif;
-            font-size: 52px;
-            font-weight: bold;
-            color: var(--pk-red);
-            white-space: nowrap;
-            line-height: 1.2;
-        }
-        .view-table td.pin { color: var(--pk-blue); font-weight: 600; font-size: 20px; }
-        .view-table .btn-say {
-            background-color: var(--pk-blue);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            padding: 6px 12px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .container {
-            width: 95%;
-            max-width: 900px;
-            margin: 20px auto;
-            display: none;
-        }
-        .container.active { display: block; }
-
-        .box {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            border: 3px solid var(--pk-blue);
-            box-shadow: 0 8px 0 rgba(59, 76, 202, 0.2);
-            margin-bottom: 25px;
-        }
-        .box h2 {
-            color: var(--pk-blue);
-            margin-top: 0;
-            border-bottom: 3px solid var(--pk-yellow);
-            padding-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: var(--pk-blue); }
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-            font-family: 'Chakra Petch', sans-serif;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--pk-blue);
-            box-shadow: 0 0 5px rgba(59, 76, 202, 0.4);
-        }
-
-        .deck-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
-            background-color: #f8fafc;
-            border: 2px solid #cbd5e1;
-            border-radius: 10px;
-            margin-top: 8px;
-            font-size: 16px;
-        }
-        .btn-del-deck {
-            background-color: var(--pk-red);
-            color: white;
-            border: none;
-            padding: 6px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-family: 'Chakra Petch', sans-serif;
-            transition: background 0.2s;
-            box-shadow: 0 2px 0 #8b0000;
-        }
-        .btn-del-deck:active {
-            transform: translateY(2px);
-            box-shadow: 0 0 0 #8b0000;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border: 2px solid var(--pk-blue);
-        }
-        .word-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-            text-align: left;
-        }
-        .word-table th {
-            background-color: var(--pk-blue);
-            color: var(--pk-yellow);
-            padding: 12px 10px;
-            font-size: 15px;
-            border: 1px solid #2563eb;
-            white-space: nowrap;
-        }
-        .word-table td {
-            padding: 6px;
-            border: 1px solid #e2e8f0;
-        }
-        .word-table input {
-            border: 1px solid #cbd5e1;
-            padding: 8px;
-            font-size: 14px;
-            border-radius: 4px;
-        }
-        .word-table input:focus { background-color: #fffbeb; }
-
-        .table-actions {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        button.btn-sec {
-            background-color: var(--pk-yellow);
-            color: var(--pk-dark);
-            border: 2px solid #d4af37;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-family: 'Chakra Petch', sans-serif;
-        }
-        button.btn-sec:hover { background-color: #fde047; }
-
-        button.btn-del-row {
-            background-color: var(--pk-red);
-            color: white;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        button.btn-main {
-            background-color: var(--pk-blue);
-            color: var(--pk-yellow);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-            font-family: 'Chakra Petch', sans-serif;
-            box-shadow: 0 4px 0 #1e3a8a;
-            transition: transform 0.1s;
-        }
-        button.btn-main:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #1e3a8a;
-        }
-
-        /* ================= โหมด Pokedex & Dictation ================= */
-        .play-area { 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .pokedex-container {
-            background-color: var(--pokedex-red);
-            padding: 20px;
-            border-radius: 15px 15px 30px 15px;
-            width: 100%;
-            max-width: 380px;
-            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.2), 8px 8px 0px rgba(0,0,0,0.1);
-            border: 3px solid #8b0000;
-            margin-top: 15px;
-            position: relative;
-            box-sizing: border-box;
-        }
-
-        .pokedex-lens {
-            width: 50px;
-            height: 50px;
-            background: radial-gradient(#99ddff 20%, #0077ff 80%);
-            border: 4px solid #fff;
-            border-radius: 50%;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
-            margin-bottom: 15px;
-            position: relative;
-        }
-        .pokedex-lens::after {
-            content: '';
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            width: 15px;
-            height: 15px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.6;
-        }
-
-        .pokedex-screen-wrapper {
-            background-color: #dfdfdf;
-            padding: 15px;
-            border-radius: 10px 10px 30px 10px;
-            border: 2px solid #555;
-            margin-bottom: 15px;
-        }
-
-        .pokedex-screen {
-            background-color: var(--screen-bg);
-            border: 4px solid #555;
-            border-radius: 5px;
-            padding: 15px;
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2);
-            position: relative;
-            align-items: center; 
-        }
-
-        .dex-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            border-bottom: 2px solid rgba(0,0,0,0.1);
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            width: 100%;
-        }
-
-        .main-word-display {
-            font-size: 40px;
-            font-weight: bold;
-            text-align: center;
-            color: #111;
-            margin-top: 20px;
-            word-wrap: break-word;
-            max-width: 100%;
-        }
-
-        .speak-btn {
-            background-color: var(--pk-blue);
-            color: white;
-            border: 2px solid #1e3a8a;
-            border-radius: 20px;
-            padding: 8px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 15px;
-            margin-bottom: 15px;
-            font-family: 'Chakra Petch', sans-serif;
-            font-weight: bold;
-            box-shadow: 0 4px 0 #1e3a8a;
-            transition: transform 0.1s;
-        }
-        .speak-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #1e3a8a;
-        }
-
-        .translation-box, .reveal-box {
-            display: none;
-            width: 100%;
-            margin-top: 10px;
-            border-top: 2px dashed #555;
-            padding-top: 15px;
-        }
-
-        .data-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
-        .data-label {
-            background-color: #333;
-            color: white;
-            border-radius: 4px;
-            padding: 2px 8px;
-            font-size: 12px;
-            margin-right: 10px;
-            min-width: 60px;
-            text-align: center;
-        }
-        .data-val { font-weight: 600; color: #111; }
-
-        .pokedex-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .action-btn {
-            padding: 12px;
-            border: 2px solid #333;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'Chakra Petch', sans-serif;
-            text-transform: uppercase;
-            transition: all 0.1s;
-        }
-        .action-btn:active { transform: scale(0.95); }
-        
-        .btn-scan { background-color: var(--pk-yellow); color: var(--pk-dark); box-shadow: 0 4px 0 #a68a00; width: 100%;}
-        .btn-scan:active { box-shadow: 0 0 0 #a68a00; }
-
-        .battle-actions { display: none; gap: 10px; width: 100%; }
-        .btn-catch { background-color: #22c55e; color: white; flex: 1; box-shadow: 0 4px 0 #166534; }
-        .btn-run { background-color: #333; color: white; flex: 1; box-shadow: 0 4px 0 #000; }
-        .btn-check { background-color: var(--pk-blue); color: white; flex: 2; box-shadow: 0 4px 0 #1e3a8a; }
-
-    </style>
+/* Pokedex */
+.play-area{display:flex;flex-direction:column;align-items:center}
+.pokedex-container{background-color:var(--pokedex-red);padding:20px;border-radius:15px 15px 30px 15px;width:100%;max-width:380px;box-shadow:inset -5px -5px 15px rgba(0,0,0,.2),8px 8px 0 rgba(0,0,0,.1);border:3px solid #8b0000;margin-top:15px;position:relative;box-sizing:border-box}
+.pokedex-lens{width:50px;height:50px;background:radial-gradient(#99ddff 20%,#0077ff 80%);border:4px solid #fff;border-radius:50%;box-shadow:2px 2px 5px rgba(0,0,0,.3);margin-bottom:15px;position:relative}
+.pokedex-lens::after{content:'';position:absolute;top:5px;left:5px;width:15px;height:15px;background:#fff;border-radius:50%;opacity:.6}
+.pokedex-screen-wrapper{background-color:#dfdfdf;padding:15px;border-radius:10px 10px 30px 10px;border:2px solid #555;margin-bottom:15px}
+.pokedex-screen{background-color:var(--screen-bg);border:4px solid #555;border-radius:5px;padding:15px;min-height:180px;display:flex;flex-direction:column;box-shadow:inset 2px 2px 5px rgba(0,0,0,.2);position:relative;align-items:center}
+.dex-header{display:flex;justify-content:space-between;font-size:14px;font-weight:bold;color:#333;border-bottom:2px solid rgba(0,0,0,.1);padding-bottom:5px;margin-bottom:15px;text-transform:uppercase;width:100%}
+.main-word-display{font-size:calc(40px*var(--zh-scale));font-weight:bold;text-align:center;color:#111;margin-top:20px;word-wrap:break-word;max-width:100%}
+.speak-btn{background-color:var(--pk-blue);color:#fff;border:2px solid #1e3a8a;border-radius:20px;padding:8px 20px;font-size:16px;cursor:pointer;margin-top:15px;margin-bottom:15px;font-family:'Chakra Petch',sans-serif;font-weight:bold;box-shadow:0 4px 0 #1e3a8a;transition:transform .1s}
+.speak-btn:active{transform:translateY(4px);box-shadow:none}
+.translation-box,.reveal-box{display:none;width:100%;margin-top:10px;border-top:2px dashed #555;padding-top:15px;text-align:center}
+.data-row{display:flex;align-items:center;margin-bottom:8px;font-size:15px}
+.data-label{background-color:#333;color:#fff;border-radius:4px;padding:2px 8px;font-size:12px;margin-right:10px;min-width:60px;text-align:center}
+.data-val{font-weight:600;color:#111}
+.pokedex-controls{display:flex;flex-direction:column;gap:10px}
+.action-btn{padding:12px;border:2px solid #333;border-radius:8px;font-size:18px;font-weight:bold;cursor:pointer;font-family:'Chakra Petch',sans-serif;text-transform:uppercase;transition:all .1s}
+.action-btn:active{transform:scale(.95)}
+.btn-scan{background-color:var(--pk-yellow);color:var(--pk-dark);box-shadow:0 4px 0 #a68a00;width:100%}
+.btn-scan:active{box-shadow:none}
+.battle-actions{display:none;gap:10px;width:100%}
+.btn-catch{background-color:#22c55e;color:#fff;flex:1;box-shadow:0 4px 0 #166534}
+.btn-run{background-color:#333;color:#fff;flex:1;box-shadow:0 4px 0 #000}
+.btn-check{background-color:var(--pk-blue);color:#fff;flex:2;box-shadow:0 4px 0 #1e3a8a}
+</style>
 </head>
 <body>
+<header><h1>🔴 PokeWord Master ⚪</h1></header>
 
-    <header>
-        <h1>🔴 PokeWord Master ⚪</h1>
-    </header>
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('study')">🎮 โหมดแบทเทิล</button>
+    <button class="tab-btn" onclick="switchTab('dictation')">📝 ภารกิจแกะรอยเสียง (เขียนกระดาษ)</button>
+    <button class="tab-btn" onclick="switchTab('table')">📋 ตารางคำศัพท์</button>
+    <button class="tab-btn" onclick="switchTab('sentence')">💬 แต่งประโยค/สนทนา</button>
+    <button class="tab-btn" onclick="switchTab('exam')">🎓 เตรียมสอบ</button>
+    <button class="tab-btn" onclick="switchTab('admin')">⚙️ จัดการ PC Box</button>
+</div>
+<div class="zoom-bar">
+    <span>🔠 ขนาดตัวจีน</span>
+    <button onclick="setZh(-0.1)">A−</button>
+    <input type="range" id="zhRange" min="0.7" max="2" step="0.1" value="1" oninput="applyZh(this.value)">
+    <button onclick="setZh(0.1)">A+</button>
+    <span id="zhVal">100%</span>
+</div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('study')">🎮 โหมดแบทเทิล</button>
-        <button class="tab-btn" onclick="switchTab('dictation')">📝 ภารกิจแกะรอยเสียง (เขียนกระดาษ)</button>
-        <button class="tab-btn" onclick="switchTab('table')">📋 ตารางคำศัพท์</button>
-        <button class="tab-btn" onclick="switchTab('sentence')">💬 แต่งประโยค/สนทนา</button>
-        <button class="tab-btn" onclick="switchTab('exam')">🎓 เตรียมสอบ</button>
-        <button class="tab-btn" onclick="switchTab('admin')">⚙️ จัดการ PC Box</button>
+<!-- 1. แบทเทิล -->
+<div class="container active" id="study-container">
+    <div class="box">
+        <h2>🎒 เลือกเด็คสำหรับแบทเทิล (ท่องจำ)</h2>
+        <div class="form-group"><select id="chapterSelectStudy"><option value="">-- กรุณาเลือกกล่องเด็ค --</option></select></div>
+        <button class="btn-main" onclick="startStudy()" style="width:100%;">เปิด Pokedex 🔍</button>
     </div>
-
-    <!-- ================= 1. โหมดแบทเทิล (Flashcard) ================= -->
-    <div class="container active" id="study-container">
-        <div class="box">
-            <h2>🎒 เลือกเด็คสำหรับแบทเทิล (ท่องจำ)</h2>
-            <div class="form-group">
-                <select id="chapterSelectStudy">
-                    <option value="">-- กรุณาเลือกกล่องเด็ค --</option>
-                </select>
-            </div>
-            <button class="btn-main" onclick="startStudy()" style="width: 100%;">เปิด Pokedex 🔍</button>
-        </div>
-
-        <div id="study-area" class="play-area" style="display: none;">
-            <div class="pokedex-container">
-                <div class="pokedex-lens"></div>
-                <div class="pokedex-screen-wrapper">
-                    <div class="pokedex-screen">
-                        <div class="dex-header">
-                            <span>BATTLE MODE</span>
-                            <span id="card-counter">เหลือ: 0</span>
-                        </div>
-                        <div class="main-word-display" id="display-col1"></div>
-                        <button id="btn-speak" class="speak-btn" onclick="speakChinese(document.getElementById('display-col1').innerText)">🔊 ฟังเสียง</button>
-                        
-                        <div class="translation-box" id="display-details">
-                            <div class="data-row"><span class="data-label" style="background:#3b82f6;">คำอ่าน</span><span class="data-val" id="display-col2"></span></div>
-                            <div class="data-row"><span class="data-label" style="background:#eab308; color:black;">ประเภท</span><span class="data-val" id="display-col3"></span></div>
-                            <div class="data-row"><span class="data-label" style="background:#ef4444;">ข้อมูล</span><span class="data-val" id="display-col4"></span></div>
-                        </div>
+    <div id="study-area" class="play-area" style="display:none;">
+        <div class="pokedex-container">
+            <div class="pokedex-lens"></div>
+            <div class="pokedex-screen-wrapper">
+                <div class="pokedex-screen">
+                    <div class="dex-header"><span>BATTLE MODE</span><span id="card-counter">เหลือ: 0</span></div>
+                    <div class="main-word-display zh" id="display-col1"></div>
+                    <button id="btn-speak" class="speak-btn" onclick="speakChinese(document.getElementById('display-col1').innerText)">🔊 ฟังเสียง</button>
+                    <div class="translation-box" id="display-details" style="text-align:left;">
+                        <div class="data-row"><span class="data-label" style="background:#3b82f6;">คำอ่าน</span><span class="data-val" id="display-col2"></span></div>
+                        <div class="data-row"><span class="data-label" style="background:#eab308;color:black;">ประเภท</span><span class="data-val" id="display-col3"></span></div>
+                        <div class="data-row"><span class="data-label" style="background:#ef4444;">ข้อมูล</span><span class="data-val" id="display-col4"></span></div>
                     </div>
                 </div>
-                <div class="pokedex-controls">
-                    <button id="btn-show-trans" class="action-btn btn-scan" onclick="showTranslation()">กดเพื่อสแกนข้อมูล 📡</button>
-                    <div class="battle-actions" id="action-buttons">
-                        <button class="action-btn btn-catch" onclick="markWord(true)">จับได้แล้ว! (จำได้)</button>
-                        <button class="action-btn btn-run" onclick="markWord(false)">หนีไป.. (จำไม่ได้)</button>
-                    </div>
+            </div>
+            <div class="pokedex-controls">
+                <button id="btn-show-trans" class="action-btn btn-scan" onclick="showTranslation()">กดเพื่อสแกนข้อมูล 📡</button>
+                <div class="battle-actions" id="action-buttons">
+                    <button class="action-btn btn-catch" onclick="markWord(true)">จับได้แล้ว! (จำได้)</button>
+                    <button class="action-btn btn-run" onclick="markWord(false)">หนีไป.. (จำไม่ได้)</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ================= 2. โหมดเขียนตามคำบอก (ภารกิจแกะรอยเสียง) ================= -->
-    <div class="container" id="dictation-container">
-        <div class="box">
-            <h2>📻 ศูนย์วิจัยโปเกมอน: ภารกิจแกะรอยเสียง</h2>
-            <p style="color: #444; font-size: 15px; margin-top: 0;"><b>วิธีเล่น:</b> หยิบสมุดและปากกาขึ้นมา! ฟังเสียงคำศัพท์ แล้วเขียนลงในกระดาษของคุณ จากนั้นกดดูเฉลยเพื่อตรวจความถูกต้องด้วยตัวเอง</p>
-            <div class="form-group">
-                <select id="chapterSelectDictation">
-                    <option value="">-- กรุณาเลือกกล่องเด็คเพื่อทำการวิจัย --</option>
-                </select>
-            </div>
-            <button class="btn-main" onclick="startDictation()" style="width: 100%; background-color:#22c55e; box-shadow: 0 4px 0 #166534;">เริ่มภารกิจวิจัย 🎧</button>
-        </div>
-
-        <div id="dictation-area" class="play-area" style="display: none;">
-            <div class="pokedex-container">
-                <div class="pokedex-lens"></div>
-                <div class="pokedex-screen-wrapper">
-                    <div class="pokedex-screen">
-                        <div class="dex-header">
-                            <span>RESEARCH MISSION</span>
-                            <span id="dic-counter">เหลือ: 0</span>
-                        </div>
-                        
-                        <p style="text-align:center; font-weight:bold; color:#1e3a8a; margin-bottom: 5px; font-size:18px;">✍️ เตรียมกระดาษและปากกาให้พร้อม!</p>
-                        
-                        <button class="speak-btn" style="display:block; transform: scale(1.1); margin-top:15px; margin-bottom:5px;" onclick="speakChinese(document.getElementById('dic-target-word').innerText)">🔊 กดเพื่อฟังเสียงรหัสลับ</button>
-                        
-                        <!-- พื้นที่สำหรับเฉลย -->
-                        <div class="reveal-box" id="dic-reveal-area">
-                            <div class="main-word-display" id="dic-target-word" style="margin-top:0; color:#cc0000;"></div>
-                            <div class="data-row" style="margin-top:15px;"><span class="data-label" style="background:#3b82f6;">คำอ่าน</span><span class="data-val" id="dic-col2"></span></div>
-                            <div class="data-row"><span class="data-label" style="background:#ef4444;">ความหมาย</span><span class="data-val" id="dic-col4"></span></div>
-                        </div>
+<!-- 2. แกะรอยเสียง -->
+<div class="container" id="dictation-container">
+    <div class="box">
+        <h2>📻 ศูนย์วิจัยโปเกมอน: ภารกิจแกะรอยเสียง</h2>
+        <p style="color:#444;font-size:15px;margin-top:0;"><b>วิธีเล่น:</b> หยิบสมุดและปากกาขึ้นมา! ฟังเสียงคำศัพท์ แล้วเขียนลงในกระดาษของคุณ จากนั้นกดดูเฉลยเพื่อตรวจความถูกต้องด้วยตัวเอง</p>
+        <div class="form-group"><select id="chapterSelectDictation"><option value="">-- กรุณาเลือกกล่องเด็คเพื่อทำการวิจัย --</option></select></div>
+        <button class="btn-main" onclick="startDictation()" style="width:100%;background-color:#22c55e;box-shadow:0 4px 0 #166534;">เริ่มภารกิจวิจัย 🎧</button>
+    </div>
+    <div id="dictation-area" class="play-area" style="display:none;">
+        <div class="pokedex-container">
+            <div class="pokedex-lens"></div>
+            <div class="pokedex-screen-wrapper">
+                <div class="pokedex-screen">
+                    <div class="dex-header"><span>RESEARCH MISSION</span><span id="dic-counter">เหลือ: 0</span></div>
+                    <p style="text-align:center;font-weight:bold;color:#1e3a8a;margin-bottom:5px;font-size:18px;">✍️ เตรียมกระดาษและปากกาให้พร้อม!</p>
+                    <button class="speak-btn" style="display:block;transform:scale(1.1);margin-top:15px;margin-bottom:5px;" onclick="speakChinese(document.getElementById('dic-target-word').innerText)">🔊 กดเพื่อฟังเสียงรหัสลับ</button>
+                    <div class="reveal-box" id="dic-reveal-area" style="text-align:left;">
+                        <div class="main-word-display zh" id="dic-target-word" style="margin-top:0;color:#cc0000;"></div>
+                        <div class="data-row" style="margin-top:15px;"><span class="data-label" style="background:#3b82f6;">คำอ่าน</span><span class="data-val" id="dic-col2"></span></div>
+                        <div class="data-row"><span class="data-label" style="background:#ef4444;">ความหมาย</span><span class="data-val" id="dic-col4"></span></div>
                     </div>
                 </div>
-                <div class="pokedex-controls">
-                    <button id="btn-reveal-dic" class="action-btn btn-scan" onclick="revealDictationAnswer()">🔍 สแกนดูเฉลย</button>
-                    <div class="battle-actions" id="dic-action-buttons">
-                        <button class="action-btn btn-catch" onclick="markDictationWord(true)">เขียนถูก! ✅</button>
-                        <button class="action-btn btn-run" onclick="markDictationWord(false)">เขียนผิด ❌</button>
-                    </div>
+            </div>
+            <div class="pokedex-controls">
+                <button id="btn-reveal-dic" class="action-btn btn-scan" onclick="revealDictationAnswer()">🔍 สแกนดูเฉลย</button>
+                <div class="battle-actions" id="dic-action-buttons">
+                    <button class="action-btn btn-catch" onclick="markDictationWord(true)">เขียนถูก! ✅</button>
+                    <button class="action-btn btn-run" onclick="markDictationWord(false)">เขียนผิด ❌</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ================= 3. โหมดตารางคำศัพท์ ================= -->
-    <div class="container" id="table-container">
-        <div class="box">
-            <h2>📋 ตารางคำศัพท์</h2>
-            <div class="form-group">
-                <select id="chapterSelectTable" onchange="renderWordTable()">
-                    <option value="">-- กรุณาเลือกกล่องเด็ค --</option>
-                </select>
-            </div>
-            <div class="table-responsive">
-                <table class="word-table view-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 5%;">#</th>
-                            <th>ตัวจีน</th>
-                            <th>พินอิน</th>
-                            <th>คำอ่าน</th>
-                            <th>คำแปล</th>
-                            <th style="width: 5%;">🔊</th>
-                        </tr>
-                    </thead>
-                    <tbody id="viewTableBody">
-                        <tr><td colspan="6" style="text-align:center; color:#64748b;">เลือกกล่องเด็คเพื่อดูตาราง</td></tr>
-                    </tbody>
-                </table>
-            </div>
+<!-- 3. ตาราง -->
+<div class="container" id="table-container">
+    <div class="box">
+        <h2>📋 ตารางคำศัพท์</h2>
+        <div class="form-group"><select id="chapterSelectTable" onchange="renderWordTable()"><option value="">-- กรุณาเลือกกล่องเด็ค --</option></select></div>
+        <div class="table-responsive">
+            <table class="word-table view-table">
+                <thead><tr><th style="width:5%;">#</th><th>ตัวจีน</th><th>พินอิน</th><th>คำอ่าน</th><th>คำแปล</th><th style="width:5%;">🔊</th></tr></thead>
+                <tbody id="viewTableBody"><tr><td colspan="6" style="text-align:center;color:#64748b;">เลือกกล่องเด็คเพื่อดูตาราง</td></tr></tbody>
+            </table>
         </div>
     </div>
+</div>
 
-    <!-- ================= โหมดแต่งประโยคและบทสนทนา ================= -->
-    <div class="container" id="sentence-container">
-        <div class="box">
-            <h2>💬 แต่งประโยคและบทสนทนา</h2>
-            <p style="color:#444; font-size:15px; margin-top:0;">
-                <span id="aiHelp" style="display:none;"><b>วิธีใช้:</b> เลือกเด็ค ตั้งค่าจำนวน แล้วกด "ให้ AI แต่งให้เลย" ระบบจะสุ่มคำจากเด็คไปแต่งประโยคและบทสนทนา แล้วบันทึกให้อัตโนมัติ</span>
-                <span id="manualHelp"><b>วิธีใช้:</b> ① เลือกเด็ค แล้วกด "สร้างคำสั่ง" ② คัดลอกคำสั่งไปวางใน AI ③ นำคำตอบมาวางในช่องด้านล่าง แล้วกด "นำเข้า"</span>
-            </p>
-            <div class="form-group">
-                <select id="chapterSelectSentence" onchange="renderSentences()">
-                    <option value="">-- กรุณาเลือกกล่องเด็ค --</option>
-                </select>
-            </div>
-            <div class="sent-row">
-                <div><label>สุ่มคำมาใช้</label>
-                    <select id="sentWordCount"><option value="5">5 คำ</option><option value="10" selected>10 คำ</option><option value="15">15 คำ</option><option value="20">20 คำ</option></select></div>
-                <div><label>ประโยคเดี่ยว</label>
-                    <select id="sentCount"><option value="0">ไม่เอา</option><option value="5" selected>5 ประโยค</option><option value="10">10 ประโยค</option></select></div>
-                <div><label>บทสนทนา</label>
-                    <select id="dlgCount"><option value="0">ไม่เอา</option><option value="1" selected>1 บท</option><option value="2">2 บท</option><option value="3">3 บท</option></select></div>
-            </div>
-            <button class="btn-main" id="btnAiGen" onclick="aiGenerateSentences()" style="display:none; width:100%; background-color:#22c55e; box-shadow:0 4px 0 #166534;">🤖 ให้ AI แต่งให้เลย</button>
-
-            <details id="manualFlow" open style="margin-top:15px;">
-                <summary style="cursor:pointer; font-weight:bold; color:var(--pk-blue);">ใช้ AI ตัวอื่นแทน (คัดลอก/วาง)</summary>
-                <div style="margin-top:12px;">
-                    <button class="btn-main" onclick="buildSentPrompt()" style="width:100%;">✨ สร้างคำสั่งสำหรับ AI</button>
-                    <div id="sentPromptWrap" style="display:none; margin-top:15px;">
-                        <label>คำสั่ง (คัดลอกไปวางใน AI):</label>
-                        <textarea id="sentPrompt" class="sent-ta" readonly></textarea>
-                        <button class="btn-sec" onclick="copySentPrompt()">📋 คัดลอกคำสั่ง</button>
-                    </div>
-                    <div style="margin-top:20px;">
-                        <label>วางคำตอบจาก AI ที่นี่:</label>
-                        <textarea id="sentImport" class="sent-ta" placeholder='วางข้อความ JSON ที่ AI ตอบกลับมา เช่น {"sentences":[...],"dialogues":[...]}'></textarea>
-                        <button class="btn-main" onclick="importSentences()" style="width:100%; background-color:#22c55e; box-shadow:0 4px 0 #166534;">📥 นำเข้าประโยค</button>
-                    </div>
+<!-- แต่งประโยค -->
+<div class="container" id="sentence-container">
+    <div class="box">
+        <h2>💬 แต่งประโยคและบทสนทนา</h2>
+        <p style="color:#444;font-size:15px;margin-top:0;">
+            <span id="aiHelp" style="display:none;"><b>วิธีใช้:</b> เลือกเด็ค ตั้งค่าจำนวน แล้วกด "ให้ AI แต่งให้เลย" ระบบจะสุ่มคำจากเด็คไปแต่งประโยคและบทสนทนา แล้วบันทึกให้อัตโนมัติ</span>
+            <span id="manualHelp"><b>วิธีใช้:</b> ① เลือกเด็ค แล้วกด "สร้างคำสั่ง" ② คัดลอกคำสั่งไปวางใน AI ③ นำคำตอบมาวางในช่องด้านล่าง แล้วกด "นำเข้า"</span>
+        </p>
+        <div class="form-group"><select id="chapterSelectSentence" onchange="renderSentences()"><option value="">-- กรุณาเลือกกล่องเด็ค --</option></select></div>
+        <div class="sent-row">
+            <div><label>สุ่มคำมาใช้</label><select id="sentWordCount"><option value="5">5 คำ</option><option value="10" selected>10 คำ</option><option value="15">15 คำ</option><option value="20">20 คำ</option></select></div>
+            <div><label>ประโยคเดี่ยว</label><select id="sentCount"><option value="0">ไม่เอา</option><option value="5" selected>5 ประโยค</option><option value="10">10 ประโยค</option></select></div>
+            <div><label>บทสนทนา</label><select id="dlgCount"><option value="0">ไม่เอา</option><option value="1" selected>1 บท</option><option value="2">2 บท</option><option value="3">3 บท</option></select></div>
+        </div>
+        <button class="btn-main" id="btnAiGen" onclick="aiGenerateSentences()" style="display:none;width:100%;background-color:#22c55e;box-shadow:0 4px 0 #166534;">🤖 ให้ AI แต่งให้เลย</button>
+        <details id="manualFlow" open style="margin-top:15px;">
+            <summary style="cursor:pointer;font-weight:bold;color:var(--pk-blue);">ใช้ AI ตัวอื่นแทน (คัดลอก/วาง)</summary>
+            <div style="margin-top:12px;">
+                <button class="btn-main" onclick="buildSentPrompt()" style="width:100%;">✨ สร้างคำสั่งสำหรับ AI</button>
+                <div id="sentPromptWrap" style="display:none;margin-top:15px;">
+                    <label>คำสั่ง (คัดลอกไปวางใน AI):</label>
+                    <textarea id="sentPrompt" class="sent-ta" readonly></textarea>
+                    <button class="btn-sec" onclick="copySentPrompt()">📋 คัดลอกคำสั่ง</button>
                 </div>
-            </details>
-        </div>
-
-        <div class="box">
-            <h2>📚 ประโยคที่บันทึกไว้</h2>
-            <div class="table-actions">
-                <button class="btn-sec" id="btnToggleTrans" onclick="toggleSentTrans()">🙈 ซ่อนพินอิน/คำแปล (กดการ์ดเพื่อดู)</button>
-                <button class="btn-sec" onclick="clearSentences()" style="background-color:#fecaca; border-color:#f87171;">🗑️ ลบทั้งหมดในเด็คนี้</button>
+                <div style="margin-top:20px;">
+                    <label>วางคำตอบจาก AI ที่นี่:</label>
+                    <textarea id="sentImport" class="sent-ta" placeholder='วางข้อความ JSON ที่ AI ตอบกลับมา เช่น {"sentences":[...],"dialogues":[...]}'></textarea>
+                    <button class="btn-main" onclick="importSentences()" style="width:100%;background-color:#22c55e;box-shadow:0 4px 0 #166534;">📥 นำเข้าประโยค</button>
+                </div>
             </div>
-            <div id="sentList"></div>
+        </details>
+    </div>
+    <div class="box">
+        <h2>📚 ประโยคที่บันทึกไว้</h2>
+        <div class="table-actions">
+            <button class="btn-sec" id="btnToggleTrans" onclick="toggleSentTrans()">🙈 ซ่อนพินอิน/คำแปล (กดการ์ดเพื่อดู)</button>
+            <button class="btn-sec" onclick="clearSentences()" style="background-color:#fecaca;border-color:#f87171;">🗑️ ลบทั้งหมดในเด็คนี้</button>
+        </div>
+        <div id="sentList"></div>
+    </div>
+</div>
+
+<!-- เตรียมสอบ -->
+<div class="container" id="exam-container">
+    <div class="box" id="examMenu">
+        <h2>🎓 เตรียมสอบ</h2>
+        <p style="color:#444;font-size:15px;margin-top:0;">เลือกหัวข้อที่ต้องการฝึก (ตามขอบเขตสอบ 8 ส่วน) — ข้อที่ตอบผิดจะวนกลับมาถามใหม่จนตอบถูกครบ</p>
+        <div class="exam-grid" id="examGrid"></div>
+    </div>
+    <div class="box" id="examPanel" style="display:none;">
+        <button class="btn-sec" onclick="showExamMenu()">← กลับเมนูเตรียมสอบ</button>
+        <h2 id="examTitle" style="margin-top:15px;"></h2>
+        <div id="examInfo"></div>
+        <div id="examControls" class="sent-row"></div>
+        <div id="examBody"></div>
+    </div>
+</div>
+
+<!-- Admin -->
+<div class="container" id="admin-container">
+    <div class="box">
+        <h2>📦 1. ระบบจัดเก็บเด็ค (PC Box)</h2>
+        <div class="form-group"><input type="text" id="chapterName" placeholder="เช่น กล่องคำศัพท์ HSK1"></div>
+        <button class="btn-main" onclick="addChapter()">+ บันทึกกล่องใหม่</button>
+        <div style="margin-top:25px;"><label>📋 รายการกล่องเด็คทั้งหมดในระบบ:</label><div id="deckListAdmin"></div></div>
+    </div>
+    <div class="box">
+        <h2>📊 2. ตารางบันทึกข้อมูลคำศัพท์</h2>
+        <div class="form-group"><label>เลือกกล่องเด็คที่ต้องการเพิ่มคำศัพท์:</label><select id="chapterSelectAdmin"><option value="">-- กรุณาเลือกกล่องเด็ค --</option></select></div>
+        <div class="table-actions">
+            <button class="btn-sec" onclick="addTableRow()">+ เพิ่ม 1 แถว</button>
+            <button class="btn-sec" onclick="addMultipleRows(5)">+ เพิ่ม 5 แถว</button>
+            <button class="btn-sec" onclick="clearEmptyRows()" style="background-color:#e2e8f0;border-color:#cbd5e1;">🧹 ลบแถวว่าง</button>
+        </div>
+        <div class="table-responsive">
+            <table class="word-table">
+                <thead><tr><th style="width:5%;">#</th><th style="width:23%;">คำศัพท์หลัก</th><th style="width:23%;">พินอิน/คำอ่าน</th><th style="width:23%;">หมวดหมู่/ประเภท</th><th style="width:23%;">ความหมาย</th><th style="width:3%;">ลบ</th></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        <button class="btn-main" onclick="saveTableWords()" style="width:100%;background-color:var(--pk-red);box-shadow:0 4px 0 #8b0000;color:white;">💾 บันทึกข้อมูลลง Pokedex</button>
+    </div>
+    <div class="box">
+        <h2>💾 3. สำรอง / ย้ายข้อมูล</h2>
+        <p style="color:#444;font-size:15px;margin-top:0;">ใช้ย้ายข้อมูลระหว่างเครื่องหรือระหว่างไฟล์/หน้าเว็บ: กด "คัดลอกข้อมูลสำรอง" แล้วไปวางในช่องของอีกที่ จากนั้นกด "กู้คืนข้อมูล"</p>
+        <textarea id="backupText" class="sent-ta" placeholder="ข้อมูลสำรองจะแสดงที่นี่ / วางข้อมูลสำรองที่นี่เพื่อกู้คืน"></textarea>
+        <div class="table-actions">
+            <button class="btn-sec" onclick="showBackup()">📋 คัดลอกข้อมูลสำรอง</button>
+            <button class="btn-sec" onclick="restoreBackup()" style="background-color:#fecaca;border-color:#f87171;">📂 กู้คืนข้อมูล (แทนที่ข้อมูลปัจจุบัน)</button>
         </div>
     </div>
+</div>
 
-    <!-- ================= โหมดเตรียมสอบ ================= -->
-    <div class="container" id="exam-container">
-        <div class="box" id="examMenu">
-            <h2>🎓 เตรียมสอบ</h2>
-            <p style="color:#444; font-size:15px; margin-top:0;">เลือกหัวข้อที่ต้องการฝึก (ตามขอบเขตสอบ 8 ส่วน)</p>
-            <div class="exam-grid" id="examGrid"></div>
-        </div>
-        <div class="box" id="examPanel" style="display:none;">
-            <button class="btn-sec" onclick="showExamMenu()">← กลับเมนูเตรียมสอบ</button>
-            <h2 id="examTitle" style="margin-top:15px;"></h2>
-            <div id="examInfo"></div>
-            <div id="examControls" class="sent-row"></div>
-            <div id="examBody"></div>
-        </div>
-    </div>
+<script>
+let appData = null;
+try { appData = JSON.parse(localStorage.getItem('pkmnWordData')); } catch (e) {}
+if (!appData) appData = { chapters: [], words: [] };
+if (!appData.sentences) appData.sentences = [];
 
-    <!-- ================= 4. ส่วนของ Admin (PC Box) ================= -->
-    <div class="container" id="admin-container">
-        <div class="box">
-            <h2>📦 1. ระบบจัดเก็บเด็ค (PC Box)</h2>
-            <div class="form-group">
-                <input type="text" id="chapterName" placeholder="เช่น กล่องคำศัพท์ HSK1">
-            </div>
-            <button class="btn-main" onclick="addChapter()">+ บันทึกกล่องใหม่</button>
+let currentStudyPool = [], currentWordIndex = -1, lastShownIndex = -1;
+let dictationPool = [], currentDictWord = null;
 
-            <div style="margin-top: 25px;">
-                <label>📋 รายการกล่องเด็คทั้งหมดในระบบ:</label>
-                <div id="deckListAdmin"></div>
-            </div>
-        </div>
+// ===== ขนาดตัวจีน =====
+function applyZh(v) {
+    v = Math.round(Math.min(2, Math.max(0.7, parseFloat(v) || 1)) * 10) / 10;
+    document.documentElement.style.setProperty('--zh-scale', v);
+    document.getElementById('zhRange').value = v;
+    document.getElementById('zhVal').textContent = Math.round(v * 100) + '%';
+    try { localStorage.setItem('pkmnZhScale', v); } catch (e) {}
+}
+function setZh(d) { applyZh(parseFloat(document.getElementById('zhRange').value) + d); }
+try { applyZh(localStorage.getItem('pkmnZhScale') || 1); } catch (e) { applyZh(1); }
 
-        <div class="box">
-            <h2>📊 2. ตารางบันทึกข้อมูลคำศัพท์</h2>
-            <div class="form-group">
-                <label>เลือกกล่องเด็คที่ต้องการเพิ่มคำศัพท์:</label>
-                <select id="chapterSelectAdmin">
-                    <option value="">-- กรุณาเลือกกล่องเด็ค --</option>
-                </select>
-            </div>
+function switchTab(tab) {
+    const ids = ['study', 'dictation', 'table', 'sentence', 'exam', 'admin'];
+    const btns = document.querySelectorAll('.tab-btn');
+    ids.forEach((id, i) => {
+        document.getElementById(id + '-container').classList.toggle('active', id === tab);
+        btns[i].classList.toggle('active', id === tab);
+    });
+    updateDropdowns();
+    if (tab === 'table') renderWordTable();
+    if (tab === 'sentence') renderSentences();
+    if (tab === 'exam') showExamMenu();
+}
 
-            <div class="table-actions">
-                <button class="btn-sec" onclick="addTableRow()">+ เพิ่ม 1 แถว</button>
-                <button class="btn-sec" onclick="addMultipleRows(5)">+ เพิ่ม 5 แถว</button>
-                <button class="btn-sec" onclick="clearEmptyRows()" style="background-color: #e2e8f0; border-color:#cbd5e1;">🧹 ลบแถวว่าง</button>
-            </div>
-
-            <div class="table-responsive">
-                <table class="word-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 5%;">#</th>
-                            <th style="width: 23%;">คำศัพท์หลัก</th>
-                            <th style="width: 23%;">พินอิน/คำอ่าน</th>
-                            <th style="width: 23%;">หมวดหมู่/ประเภท</th>
-                            <th style="width: 23%;">ความหมาย</th>
-                            <th style="width: 3%;">ลบ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-
-            <button class="btn-main" onclick="saveTableWords()" style="width: 100%; background-color: var(--pk-red); box-shadow: 0 4px 0 #8b0000; color: white;">💾 บันทึกข้อมูลลง Pokedex</button>
-        </div>
-
-        <div class="box">
-            <h2>💾 3. สำรอง / ย้ายข้อมูล</h2>
-            <p style="color:#444; font-size:15px; margin-top:0;">ใช้ย้ายข้อมูลระหว่างเครื่องหรือระหว่างไฟล์/หน้าเว็บ: กด "คัดลอกข้อมูลสำรอง" แล้วไปวางในช่องของอีกที่ จากนั้นกด "กู้คืนข้อมูล"</p>
-            <textarea id="backupText" class="sent-ta" placeholder="ข้อมูลสำรองจะแสดงที่นี่ / วางข้อมูลสำรองที่นี่เพื่อกู้คืน"></textarea>
-            <div class="table-actions">
-                <button class="btn-sec" onclick="showBackup()">📋 คัดลอกข้อมูลสำรอง</button>
-                <button class="btn-sec" onclick="restoreBackup()" style="background-color:#fecaca; border-color:#f87171;">📂 กู้คืนข้อมูล (แทนที่ข้อมูลปัจจุบัน)</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let appData = null;
-        try { appData = JSON.parse(localStorage.getItem('pkmnWordData')); } catch (e) {}
-        if (!appData) appData = { chapters: [], words: [] };
-        if (!appData.sentences) appData.sentences = [];
-        
-        // ตัวแปรสำหรับ Battle Mode
-        let currentStudyPool = [];
-        let currentWordIndex = -1;
-        let lastShownIndex = -1;
-
-        // ตัวแปรสำหรับ Dictation Mode (Research)
-        let dictationPool = [];
-        let currentDictWord = null;
-
-        function switchTab(tab) {
-            const ids = ['study', 'dictation', 'table', 'sentence', 'exam', 'admin'];
-            const btns = document.querySelectorAll('.tab-btn');
-            ids.forEach((id, i) => {
-                document.getElementById(id + '-container').classList.toggle('active', id === tab);
-                btns[i].classList.toggle('active', id === tab);
-            });
-            updateDropdowns();
-            if (tab === 'table') renderWordTable();
-            if (tab === 'sentence') renderSentences();
-            if (tab === 'exam') showExamMenu();
+// ===== PC Box =====
+function addChapter() {
+    const chapterName = document.getElementById('chapterName').value.trim();
+    if (!chapterName) return Swal.fire({ icon: 'warning', text: 'กรุณาตั้งชื่อกล่องเก็บเด็ค (PC Box) ก่อนนะ!' });
+    appData.chapters.push({ id: Date.now().toString(), name: chapterName });
+    saveData();
+    document.getElementById('chapterName').value = '';
+    updateDropdowns();
+    Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: 'สร้างกล่องเด็คใหม่เรียบร้อยแล้ว', timer: 1500, showConfirmButton: false });
+}
+function deleteChapter(chapterId, chapterName) {
+    Swal.fire({
+        title: 'แน่ใจหรือไม่?', text: `คุณต้องการลบกล่อง "${chapterName}" ทิ้งใช่ไหม?`, icon: 'warning',
+        showCancelButton: true, confirmButtonColor: '#cc0000', confirmButtonText: 'ลบเลย!', cancelButtonText: 'ยกเลิก'
+    }).then(result => {
+        if (result.isConfirmed) {
+            appData.chapters = appData.chapters.filter(ch => ch.id !== chapterId);
+            appData.words = appData.words.filter(w => w.chapterId !== chapterId);
+            appData.sentences = appData.sentences.filter(x => x.chapterId !== chapterId);
+            saveData(); updateDropdowns();
+            Swal.fire({ icon: 'success', title: 'ลบสำเร็จ!', timer: 1500, showConfirmButton: false });
         }
-
-        // --- ระบบ PC Box (Admin) ---
-        function addChapter() {
-            const chapterName = document.getElementById('chapterName').value.trim();
-            if (!chapterName) return Swal.fire({ icon: 'warning', text: 'กรุณาตั้งชื่อกล่องเก็บเด็ค (PC Box) ก่อนนะ!' });
-            
-            appData.chapters.push({ id: Date.now().toString(), name: chapterName });
-            saveData();
-            document.getElementById('chapterName').value = '';
-            updateDropdowns();
-            Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: 'สร้างกล่องเด็คใหม่เรียบร้อยแล้ว', timer: 1500, showConfirmButton: false });
-        }
-
-        function deleteChapter(chapterId, chapterName) {
-            Swal.fire({
-                title: 'แน่ใจหรือไม่?', text: `คุณต้องการลบกล่อง "${chapterName}" ทิ้งใช่ไหม?`, icon: 'warning',
-                showCancelButton: true, confirmButtonColor: '#cc0000', confirmButtonText: 'ลบเลย!', cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    appData.chapters = appData.chapters.filter(ch => ch.id !== chapterId);
-                    appData.words = appData.words.filter(w => w.chapterId !== chapterId);
-                    appData.sentences = appData.sentences.filter(x => x.chapterId !== chapterId);
-                    saveData(); updateDropdowns();
-                    Swal.fire({ icon: 'success', title: 'ลบสำเร็จ!', timer: 1500, showConfirmButton: false });
-                }
-            });
-        }
-
-        function updateDropdowns() {
-            const adminSelect = document.getElementById('chapterSelectAdmin');
-            const studySelect = document.getElementById('chapterSelectStudy');
-            const dictSelect = document.getElementById('chapterSelectDictation');
-            const tableSelect = document.getElementById('chapterSelectTable');
-            const prevTable = tableSelect.value;
-            const sentSelect = document.getElementById('chapterSelectSentence');
-            const prevSent = sentSelect.value;
-            const deckListAdmin = document.getElementById('deckListAdmin');
-            
-            const defaultOpt = '<option value="">-- กรุณาเลือกกล่องเด็ค --</option>';
-            adminSelect.innerHTML = studySelect.innerHTML = dictSelect.innerHTML = tableSelect.innerHTML = sentSelect.innerHTML = defaultOpt;
-            deckListAdmin.innerHTML = '';
-
-            appData.chapters.forEach(ch => {
-                const opt = `<option value="${ch.id}">${ch.name}</option>`;
-                adminSelect.innerHTML += opt;
-                studySelect.innerHTML += opt;
-                dictSelect.innerHTML += opt;
-                tableSelect.innerHTML += opt;
-                sentSelect.innerHTML += opt;
-                
-                const wordCount = appData.words.filter(w => w.chapterId === ch.id).length;
-                deckListAdmin.innerHTML += `
-                    <div class="deck-item">
-                        <span><strong>${ch.name}</strong> <small>(${wordCount} ข้อมูล)</small></span>
-                        <button class="btn-del-deck" onclick="deleteChapter('${ch.id}', '${ch.name}')">ลบ</button>
-                    </div>`;
-            });
-            tableSelect.value = prevTable;
-            sentSelect.value = prevSent;
-        }
-
-        // --- โหมดตารางคำศัพท์ ---
-        function renderWordTable() {
-            const chapterId = document.getElementById('chapterSelectTable').value;
-            const tbody = document.getElementById('viewTableBody');
-            tbody.innerHTML = '';
-            const words = chapterId ? appData.words.filter(w => w.chapterId === chapterId) : [];
-            if (words.length === 0) {
-                const tr = document.createElement('tr');
-                const td = document.createElement('td');
-                td.colSpan = 6; td.style.textAlign = 'center'; td.style.color = '#64748b';
-                td.textContent = chapterId ? 'กล่องนี้ยังไม่มีคำศัพท์' : 'เลือกกล่องเด็คเพื่อดูตาราง';
-                tr.appendChild(td); tbody.appendChild(tr);
-                return;
-            }
-            words.forEach((w, i) => {
-                const zh = w.col1 || w.cn || '-';
-                const cells = [
-                    [i + 1, ''], [zh, 'zh'], [w.col2 || w.pin || '-', 'pin'],
-                    [w.col3 || w.thRead || '-', ''], [w.col4 || w.thMean || '-', '']
-                ];
-                const tr = document.createElement('tr');
-                cells.forEach(([text, cls]) => {
-                    const td = document.createElement('td');
-                    td.textContent = text; if (cls) td.className = cls;
-                    tr.appendChild(td);
-                });
-                const tdBtn = document.createElement('td');
-                const btn = document.createElement('button');
-                btn.className = 'btn-say'; btn.textContent = '🔊';
-                btn.addEventListener('click', () => speakChinese(zh));
-                tdBtn.appendChild(btn); tr.appendChild(tdBtn);
-                tbody.appendChild(tr);
-            });
-        }
-
-        // ================= โหมดแต่งประโยค / บทสนทนา =================
-        let aiSample = null;
-        const hasZh = t => /[\u4e00-\u9fff]/.test(t || '');
-
-        function makeSentPrompt() {
-            const chapterId = document.getElementById('chapterSelectSentence').value;
-            if (!chapterId) { Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนนะ!' }); return null; }
-            const all = appData.words.filter(w => w.chapterId === chapterId);
-            if (all.length === 0) { Swal.fire({ icon: 'warning', text: 'กล่องนี้ยังไม่มีคำศัพท์!' }); return null; }
-            const nWords = parseInt(document.getElementById('sentWordCount').value);
-            const nSent = parseInt(document.getElementById('sentCount').value);
-            const nDlg = parseInt(document.getElementById('dlgCount').value);
-            if (nSent === 0 && nDlg === 0) { Swal.fire({ icon: 'info', text: 'เลือกอย่างน้อย 1 อย่าง (ประโยคเดี่ยว หรือ บทสนทนา)' }); return null; }
-
-            const picked = all.slice().sort(() => Math.random() - 0.5).slice(0, nWords);
-            const list = picked.map(w =>
-                '- ' + (w.col1 || w.cn || '') + ' (' + (w.col2 || w.pin || '-') + ') = ' + (w.col4 || w.thMean || '-')
-            ).join('\n');
-
-            let req = '';
-            if (nSent > 0) req += '- ประโยคเดี่ยว ' + nSent + ' ประโยค\n';
-            if (nDlg > 0) req += '- บทสนทนา ' + nDlg + ' บท (บทละ 4 บรรทัด สลับผู้พูด A และ B)\n';
-
-            return 'ช่วยแต่งประโยคภาษาจีนและบทสนทนาสั้น ๆ สำหรับคนไทยที่กำลังเรียนภาษาจีน โดยใช้คำศัพท์ต่อไปนี้ (ทุกประโยคใช้อย่างน้อย 1 คำจากรายการ และพยายามใช้ให้ครบทุกคำ):\n\n' +
-list + '\n\nความต้องการ:\n' + req +
-'- ประโยคสั้นมาก ประโยคละไม่เกิน 8 ตัวอักษรจีน (ทุกบรรทัดในบทสนทนาก็สั้นเช่นกัน)\n- ไวยากรณ์ง่าย ใช้ในชีวิตประจำวัน\n- พินอินต้องมีวรรณยุกต์ และคำแปลเป็นภาษาไทย\n\n' +
-'ตอบเป็น JSON อย่างเดียว ห้ามมีข้อความอื่นนอกจาก JSON ตามรูปแบบนี้:\n' +
-'{"sentences":[{"zh":"(ประโยคจีน)","pinyin":"(พินอิน)","th":"(คำแปลไทย)"}],"dialogues":[{"title":"(หัวข้อ)","lines":[{"speaker":"A","zh":"(ประโยคจีน)","pinyin":"(พินอิน)","th":"(คำแปลไทย)"}]}]}';
-        }
-
-        function buildSentPrompt() {
-            const prompt = makeSentPrompt();
-            if (!prompt) return;
-            document.getElementById('sentPrompt').value = prompt;
-            document.getElementById('sentPromptWrap').style.display = 'block';
-        }
-
-        function copySentPrompt() {
-            const ta = document.getElementById('sentPrompt');
-            const done = () => Swal.fire({ icon: 'success', text: 'คัดลอกแล้ว! ไปวางใน AI ได้เลย', timer: 1500, showConfirmButton: false });
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(ta.value).then(done).catch(() => { ta.select(); document.execCommand('copy'); done(); });
-            } else { ta.select(); document.execCommand('copy'); done(); }
-        }
-
-        // เพิ่มประโยค/บทสนทนาจากข้อมูล JSON ลงเด็ค (คืนค่าจำนวนที่เพิ่ม)
-        function addSentencesFromData(chapterId, data) {
-            const mkId = () => Date.now().toString() + Math.random().toString(36).slice(2, 7);
-            let count = 0;
-            (data && Array.isArray(data.sentences) ? data.sentences : []).forEach(x => {
-                if (x && hasZh(x.zh)) {
-                    appData.sentences.push({ id: mkId(), chapterId, type: 'sentence', zh: String(x.zh), pinyin: String(x.pinyin || ''), th: String(x.th || '') });
-                    count++;
-                }
-            });
-            (data && Array.isArray(data.dialogues) ? data.dialogues : []).forEach(d => {
-                if (d && Array.isArray(d.lines)) {
-                    const lines = d.lines.filter(l => l && hasZh(l.zh)).map(l => ({
-                        speaker: String(l.speaker || ''), zh: String(l.zh), pinyin: String(l.pinyin || ''), th: String(l.th || '')
-                    }));
-                    if (lines.length) {
-                        appData.sentences.push({ id: mkId(), chapterId, type: 'dialogue', title: String(d.title || 'บทสนทนา'), lines });
-                        count++;
-                    }
-                }
-            });
-            return count;
-        }
-
-        function importSentences() {
-            const chapterId = document.getElementById('chapterSelectSentence').value;
-            if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนนะ!' });
-            const raw = document.getElementById('sentImport').value;
-            if (raw.includes('ช่วยแต่งประโยคภาษาจีนและบทสนทนา')) {
-                return Swal.fire({ icon: 'warning', title: 'นี่คือคำสั่ง ไม่ใช่คำตอบ', text: 'ช่องนี้ใช้วาง "คำตอบ" ที่ AI ตอบกลับมา กรุณานำคำสั่งไปวางใน AI ก่อน แล้วค่อยคัดลอกคำตอบมาวางที่นี่' });
-            }
-            const start = raw.indexOf('{'), end = raw.lastIndexOf('}');
-            if (start < 0 || end < start) return Swal.fire({ icon: 'error', text: 'ไม่พบข้อมูล JSON กรุณาวางคำตอบจาก AI ให้ครบ' });
-            let data;
-            try { data = JSON.parse(raw.slice(start, end + 1)); }
-            catch (e) { return Swal.fire({ icon: 'error', text: 'อ่าน JSON ไม่ได้ ลองให้ AI ตอบใหม่เป็น JSON อย่างเดียว' }); }
-
-            const count = addSentencesFromData(chapterId, data);
-            if (count === 0) return Swal.fire({ icon: 'warning', text: 'ไม่พบประโยคจีนในข้อมูลที่วาง (ต้องวางคำตอบจริงจาก AI ไม่ใช่ตัวอย่างในคำสั่ง)' });
-            saveData();
-            document.getElementById('sentImport').value = '';
-            renderSentences();
-            Swal.fire({ icon: 'success', text: 'นำเข้าสำเร็จ ' + count + ' รายการ!' });
-        }
-
-        // ให้ AI แต่งในแอปเลย (ทำงานเมื่อเปิดผ่านหน้าเว็บ Artifact ของ Claude)
-        async function aiGenerateSentences() {
-            if (!aiSample) return;
-            const chapterId = document.getElementById('chapterSelectSentence').value;
-            const prompt = makeSentPrompt();
-            if (!prompt) return;
-            const btn = document.getElementById('btnAiGen');
-            const label = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = '⏳ AI กำลังแต่งประโยค... (รอสักครู่)';
-            try {
-                const data = await aiSample.json(prompt, { cache: false });
-                const count = addSentencesFromData(chapterId, data);
-                if (count === 0) {
-                    Swal.fire({ icon: 'warning', text: 'AI ตอบกลับมาแต่ไม่พบประโยคจีน ลองกดอีกครั้ง' });
-                } else {
-                    saveData(); renderSentences();
-                    Swal.fire({ icon: 'success', text: 'AI แต่งให้แล้ว ' + count + ' รายการ!', timer: 1800, showConfirmButton: false });
-                }
-            } catch (err) {
-                const code = err && err.code;
-                let msg = 'AI ตอบกลับไม่สำเร็จ ลองกดใหม่อีกครั้ง';
-                if (code === 'not_granted') msg = 'ยังไม่ได้อนุญาตให้หน้านี้ใช้ AI';
-                else if (code === 'rate_limited') msg = 'ใช้งานถี่เกินไป รอสักครู่แล้วลองใหม่';
-                Swal.fire({ icon: 'error', text: msg });
-            } finally {
-                btn.disabled = false;
-                btn.textContent = label;
-            }
-        }
-
-        // --- สำรอง / กู้คืนข้อมูล ---
-        function showBackup() {
-            const ta = document.getElementById('backupText');
-            ta.value = JSON.stringify(appData);
-            ta.select();
-            let ok = false;
-            try { ok = document.execCommand('copy'); } catch (e) {}
-            Swal.fire({ icon: 'success', text: ok ? 'คัดลอกข้อมูลสำรองแล้ว!' : 'แสดงข้อมูลสำรองแล้ว กรุณาคัดลอกจากช่องด้วยตนเอง', timer: 1800, showConfirmButton: false });
-        }
-
-        function restoreBackup() {
-            let data;
-            try { data = JSON.parse(document.getElementById('backupText').value); }
-            catch (e) { return Swal.fire({ icon: 'error', text: 'ข้อมูลสำรองไม่ถูกต้อง' }); }
-            if (!data || !Array.isArray(data.chapters) || !Array.isArray(data.words)) {
-                return Swal.fire({ icon: 'error', text: 'ไม่พบข้อมูลเด็คและคำศัพท์ในข้อมูลที่วาง' });
-            }
-            Swal.fire({
-                title: 'กู้คืนข้อมูล?', text: 'ข้อมูลปัจจุบันในที่นี้จะถูกแทนที่ทั้งหมด', icon: 'warning',
-                showCancelButton: true, confirmButtonColor: '#cc0000', confirmButtonText: 'กู้คืนเลย', cancelButtonText: 'ยกเลิก'
-            }).then(r => {
-                if (r.isConfirmed) {
-                    appData = { chapters: data.chapters, words: data.words, sentences: Array.isArray(data.sentences) ? data.sentences : [] };
-                    saveData(); updateDropdowns();
-                    Swal.fire({ icon: 'success', text: 'กู้คืนข้อมูลสำเร็จ!', timer: 1500, showConfirmButton: false });
-                }
-            });
-        }
-
-        function mkEl(tag, cls, text) {
-            const e = document.createElement(tag);
-            if (cls) e.className = cls;
-            if (text !== undefined) e.textContent = text;
-            return e;
-        }
-
-        function renderSentences() {
-            const chapterId = document.getElementById('chapterSelectSentence').value;
-            const box = document.getElementById('sentList');
-            box.innerHTML = '';
-            const items = chapterId ? appData.sentences.filter(x => x.chapterId === chapterId) : [];
-            if (items.length === 0) {
-                box.appendChild(mkEl('p', '', chapterId ? 'ยังไม่มีประโยคในเด็คนี้' : 'เลือกกล่องเด็คเพื่อดูประโยคที่บันทึกไว้'));
-                box.lastChild.style.color = '#64748b';
-                return;
-            }
-            items.forEach(item => {
-                const card = mkEl('div', 'sent-card');
-                card.addEventListener('click', () => card.classList.toggle('show'));
-
-                const del = mkEl('button', 'sent-del', '✕');
-                del.addEventListener('click', e => {
-                    e.stopPropagation();
-                    appData.sentences = appData.sentences.filter(x => x.id !== item.id);
-                    saveData(); renderSentences();
-                });
-                card.appendChild(del);
-
-                const lines = item.type === 'dialogue' ? item.lines : [item];
-                if (item.type === 'dialogue') card.appendChild(mkEl('div', 'sent-title', '💬 ' + item.title));
-                lines.forEach(l => {
-                    const row = mkEl('div', item.type === 'dialogue' ? 'sent-line' : '');
-                    const zh = mkEl('div', 'sent-zh');
-                    if (l.speaker) zh.appendChild(mkEl('span', 'sent-spk', l.speaker));
-                    zh.appendChild(document.createTextNode(l.zh));
-                    row.appendChild(zh);
-                    row.appendChild(mkEl('div', 'sent-pin', l.pinyin));
-                    row.appendChild(mkEl('div', 'sent-th', l.th));
-                    card.appendChild(row);
-                });
-
-                const tools = mkEl('div', 'sent-tools');
-                const say = mkEl('button', 'speak-btn', item.type === 'dialogue' ? '🔊 ฟังทั้งบท' : '🔊 ฟังเสียง');
-                say.style.margin = '0';
-                say.addEventListener('click', e => {
-                    e.stopPropagation();
-                    window.speechSynthesis.cancel();
-                    setTimeout(() => {
-                        lines.forEach(l => { if (/[\u4e00-\u9fff]/.test(l.zh)) speakChinese(l.zh); });
-                    }, 150);
-                });
-                tools.appendChild(say);
-                card.appendChild(tools);
-                box.appendChild(card);
-            });
-        }
-
-        function toggleSentTrans() {
-            const box = document.getElementById('sentList');
-            const hidden = box.classList.toggle('hide-trans');
-            document.getElementById('btnToggleTrans').textContent =
-                hidden ? '👀 แสดงพินอิน/คำแปลทั้งหมด' : '🙈 ซ่อนพินอิน/คำแปล (กดการ์ดเพื่อดู)';
-        }
-
-        function clearSentences() {
-            const chapterId = document.getElementById('chapterSelectSentence').value;
-            if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนนะ!' });
-            Swal.fire({
-                title: 'แน่ใจหรือไม่?', text: 'ลบประโยคและบทสนทนาทั้งหมดในเด็คนี้?', icon: 'warning',
-                showCancelButton: true, confirmButtonColor: '#cc0000', confirmButtonText: 'ลบเลย!', cancelButtonText: 'ยกเลิก'
-            }).then(r => {
-                if (r.isConfirmed) {
-                    appData.sentences = appData.sentences.filter(x => x.chapterId !== chapterId);
-                    saveData(); renderSentences();
-                }
-            });
-        }
-
-        // --- เพิ่มคำศัพท์ (เหมือนเดิม) ---
-        function addTableRow() {
-            const tbody = document.getElementById('tableBody');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="text-align:center;">-</td>
-                <td><input type="text" class="in-col1" placeholder="เช่น 你好" onpaste="handlePasteOnInput(event, this)"></td>
-                <td><input type="text" class="in-col2" placeholder="nǐ hǎo"></td>
-                <td><input type="text" class="in-col3" placeholder="คำทักทาย"></td>
-                <td><input type="text" class="in-col4" placeholder="สวัสดี"></td>
-                <td style="text-align:center;"><button class="btn-del-row" onclick="removeRow(this)">✕</button></td>
-            `;
-            tbody.appendChild(tr); updateRowNumbers();
-        }
-
-        function addMultipleRows(count) { for(let i = 0; i < count; i++) addTableRow(); }
-        function removeRow(btn) { btn.closest('tr').remove(); updateRowNumbers(); }
-        function updateRowNumbers() { document.querySelectorAll('#tableBody tr').forEach((row, i) => row.children[0].innerText = i + 1); }
-        function clearEmptyRows() {
-            document.querySelectorAll('#tableBody tr').forEach(row => {
-                if (!row.querySelector('.in-col1').value.trim()) row.remove();
-            });
-            updateRowNumbers();
-        }
-
-        function handlePasteOnInput(e, inputElem) {
-            const clip = (e.clipboardData || window.clipboardData).getData('text');
-            if (clip && clip.includes('\t')) {
-                e.preventDefault();
-                const lines = clip.trim().split('\n');
-                let targetRow = inputElem.closest('tr');
-                lines.forEach(line => {
-                    const cols = line.split('\t');
-                    if (cols.length >= 2) {
-                        if (!targetRow) { addTableRow(); targetRow = document.querySelector('#tableBody tr:last-child'); }
-                        targetRow.querySelector('.in-col1').value = cols[0] || '';
-                        targetRow.querySelector('.in-col2').value = cols[1] || '';
-                        targetRow.querySelector('.in-col3').value = cols[2] || '';
-                        targetRow.querySelector('.in-col4').value = cols[3] || '';
-                        targetRow = targetRow.nextElementSibling;
-                    }
-                });
-                ensureSpareRow();
-            }
-        }
-
-        // เพิ่มแถวใหม่อัตโนมัติเมื่อแถวสุดท้ายถูกกรอกแล้ว
-        function ensureSpareRow() {
-            const rows = document.querySelectorAll('#tableBody tr');
-            if (rows.length === 0) return;
-            const last = rows[rows.length - 1];
-            if (last.querySelector('.in-col1').value.trim()) addTableRow();
-        }
-
-        function saveTableWords() {
-            const chapterId = document.getElementById('chapterSelectAdmin').value;
-            if (!chapterId) return Swal.fire({ icon: 'warning', text: 'เลือกกล่องเด็คก่อนนะ!' });
-
-            let savedCount = 0;
-            document.querySelectorAll('#tableBody tr').forEach(row => {
-                const col1 = row.querySelector('.in-col1').value.trim();
-                if (col1) {
-                    appData.words.push({ 
-                        chapterId, col1: col1, 
-                        col2: row.querySelector('.in-col2').value.trim(), 
-                        col3: row.querySelector('.in-col3').value.trim(), 
-                        col4: row.querySelector('.in-col4').value.trim(),
-                        cn: col1 
-                    });
-                    savedCount++;
-                }
-            });
-
-            if (savedCount > 0) {
-                saveData();
-                document.getElementById('tableBody').innerHTML = '';
-                addMultipleRows(3); updateDropdowns(); 
-                Swal.fire({ icon: 'success', text: `บันทึกข้อมูล ${savedCount} รายการ สำเร็จ!` });
-            }
-        }
-        function saveData() { try { localStorage.setItem('pkmnWordData', JSON.stringify(appData)); } catch (e) {} }
-
-        // --- TTS ระบบอ่านออกเสียงภาษาจีน ---
-        function speakChinese(wordToSpeak) {
-            if (!wordToSpeak || wordToSpeak === '-') return;
-            const utterance = new SpeechSynthesisUtterance(wordToSpeak);
-            utterance.lang = 'zh-CN'; 
-            utterance.rate = 0.85; 
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // ================= 1. Pokedex Battle Mode =================
-        function startStudy() {
-            const chapterId = document.getElementById('chapterSelectStudy').value;
-            if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อน' });
-
-            currentStudyPool = appData.words.filter(w => w.chapterId === chapterId);
-            if (currentStudyPool.length === 0) return Swal.fire({ icon: 'warning', text: 'กล่องว่างเปล่า!' });
-
-            document.getElementById('study-area').style.display = 'flex';
-            lastShownIndex = -1; nextRandomWord();
-        }
-
-        function nextRandomWord() {
-            if (currentStudyPool.length === 0) {
-                document.getElementById('study-area').style.display = 'none';
-                return Swal.fire({ icon: 'success', title: 'Master!', text: 'คุณจดจำข้อมูลทั้งหมดได้แล้ว!' });
-            }
-            document.getElementById('card-counter').innerText = `เหลือข้อมูล: ${currentStudyPool.length}`;
-
-            let randIdx = Math.floor(Math.random() * currentStudyPool.length);
-            if (currentStudyPool.length > 1 && randIdx === lastShownIndex) randIdx = (randIdx + 1) % currentStudyPool.length;
-            
-            currentWordIndex = randIdx; lastShownIndex = currentWordIndex;
-            const word = currentStudyPool[currentWordIndex];
-
-            document.getElementById('display-col1').innerText = word.col1 || word.cn || '-';
-            document.getElementById('display-col2').innerText = word.col2 || word.pin || '-';
-            document.getElementById('display-col3').innerText = word.col3 || word.thRead || '-';
-            document.getElementById('display-col4').innerText = word.col4 || word.thMean || '-';
-            
-            document.getElementById('btn-speak').style.display = 'block';
-            document.getElementById('display-details').style.display = 'none';
-            document.getElementById('btn-show-trans').style.display = 'block';
-            document.getElementById('action-buttons').style.display = 'none';
-        }
-
-        function showTranslation() {
-            document.getElementById('display-details').style.display = 'block';
-            document.getElementById('btn-show-trans').style.display = 'none';
-            document.getElementById('action-buttons').style.display = 'flex';
-        }
-
-        function markWord(isRemembered) {
-            if (isRemembered) { currentStudyPool.splice(currentWordIndex, 1); lastShownIndex = -1; }
-            nextRandomWord();
-        }
-
-        // ================= 2. Dictation Mode (ภารกิจแกะรอยเสียง / เขียนกระดาษ) =================
-        function startDictation() {
-            const chapterId = document.getElementById('chapterSelectDictation').value;
-            if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนเริ่มทำภารกิจวิจัย!' });
-
-            dictationPool = appData.words.filter(w => w.chapterId === chapterId);
-            if (dictationPool.length === 0) return Swal.fire({ icon: 'warning', text: 'กล่องนี้ยังไม่มีข้อมูลคำศัพท์เลย!' });
-
-            dictationPool = dictationPool.sort(() => Math.random() - 0.5);
-
-            document.getElementById('dictation-area').style.display = 'flex';
-            nextDictationWord();
-        }
-
-        function nextDictationWord() {
-            if (dictationPool.length === 0) {
-                document.getElementById('dictation-area').style.display = 'none';
-                return Swal.fire({ icon: 'success', title: 'Mission Clear!', text: '🎉 ภารกิจสำเร็จ! ศาสตราจารย์ภูมิใจในตัวคุณมาก คุณถอดรหัสครบทุกคำแล้ว!' });
-            }
-
-            document.getElementById('dic-counter').innerText = `รอการวิจัย: ${dictationPool.length}`;
-            
-            document.getElementById('dic-reveal-area').style.display = 'none';
-            document.getElementById('btn-reveal-dic').style.display = 'block';
-            document.getElementById('dic-action-buttons').style.display = 'none';
-            
-            currentDictWord = dictationPool[0];
-            const target = currentDictWord.col1 || currentDictWord.cn;
-            
-            document.getElementById('dic-target-word').innerText = target;
-            document.getElementById('dic-col2').innerText = currentDictWord.col2 || currentDictWord.pin || '-';
-            document.getElementById('dic-col4').innerText = currentDictWord.col4 || currentDictWord.thMean || '-';
-            
-            setTimeout(() => { speakChinese(target); }, 500);
-        }
-
-        function revealDictationAnswer() {
-            document.getElementById('dic-reveal-area').style.display = 'block';
-            document.getElementById('btn-reveal-dic').style.display = 'none';
-            document.getElementById('dic-action-buttons').style.display = 'flex';
-        }
-
-        function markDictationWord(isCorrect) {
-            if (isCorrect) {
-                dictationPool.shift(); 
-            } else {
-                const wrongWord = dictationPool.shift();
-                dictationPool.push(wrongWord);
-            }
-            nextDictationWord();
-        }
-
-        // ================= โหมดเตรียมสอบ (8 หัวข้อ) =================
-        const EXAM_MODES = [
-            { id: 1, icon: '📝', title: 'คำศัพท์ เขียนพินอิน+คำแปล', hint: 'ฝึก 20 ข้อ จากเด็คของคุณ', start: examVocab },
-            { id: 2, icon: '🔢', title: 'เขียนเลขจีน 1-10', hint: 'เลขอารบิก ↔ ตัวจีน', start: examNumbers },
-            { id: 3, icon: '💴', title: 'ราคาสินค้าแบบจีน', hint: '5 ข้อ 块 / 毛', start: examPrices },
-            { id: 4, icon: '🎵', title: 'การผันเสียงของ 一', hint: 'เลือก yī / yí / yì', start: examYi },
-            { id: 5, icon: '🏫', title: 'สถานที่', hint: '10 ข้อ', start: examPlaces },
-            { id: 6, icon: '🖼️', title: 'เขียนบรรยายภาพ', hint: '5 ข้อ', start: examPictures },
-            { id: 7, icon: '🧩', title: 'เรียงประโยค', hint: 'แตะคำให้เป็นประโยค', start: examOrder },
-            { id: 8, icon: '✅', title: 'เลือก 是 / 不是', hint: 'เติมคำให้ถูก', start: examShiBu }
-        ];
-
-        function shuffleArr(a) { return a.slice().sort(() => Math.random() - 0.5); }
-
-        function showExamMenu() {
-            document.getElementById('examPanel').style.display = 'none';
-            document.getElementById('examMenu').style.display = 'block';
-            const grid = document.getElementById('examGrid');
-            if (grid.children.length) return;
-            EXAM_MODES.forEach(m => {
-                const b = mkEl('button', 'exam-card');
-                const top = mkEl('div');
-                top.appendChild(mkEl('span', 'no', String(m.id)));
-                top.appendChild(mkEl('b', '', m.icon + ' ' + m.title));
-                b.appendChild(top);
-                b.appendChild(mkEl('small', '', m.hint));
-                b.addEventListener('click', () => openExam(m.id));
-                grid.appendChild(b);
-            });
-        }
-
-        function openExam(id) {
-            const m = EXAM_MODES.find(x => x.id === id);
-            document.getElementById('examMenu').style.display = 'none';
-            document.getElementById('examPanel').style.display = 'block';
-            document.getElementById('examTitle').textContent = m.icon + ' ' + m.id + '. ' + m.title;
-            document.getElementById('examInfo').innerHTML = '';
-            document.getElementById('examControls').innerHTML = '';
-            document.getElementById('examBody').innerHTML = '';
-            window.speechSynthesis.cancel();
-            m.start();
-        }
-
-        function setExamInfo(text) {
-            const box = document.getElementById('examInfo');
-            box.innerHTML = '';
-            const d = mkEl('div', 'info-box');
-            text.split('\n').forEach((line, i) => { if (i) d.appendChild(document.createElement('br')); d.appendChild(document.createTextNode(line)); });
-            box.appendChild(d);
-        }
-
-        // สร้างช่องควบคุม: คืนค่า element select / ปุ่ม
-        function addExamSelect(label, options) {
-            const wrap = mkEl('div');
-            wrap.appendChild(mkEl('label', '', label));
-            const sel = document.createElement('select');
-            options.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); });
-            wrap.appendChild(sel);
-            document.getElementById('examControls').appendChild(wrap);
-            return sel;
-        }
-        function addExamButton(text, fn) {
-            const wrap = mkEl('div');
-            wrap.appendChild(mkEl('label', '', '\u00a0'));
-            const b = mkEl('button', 'btn-main', text);
-            b.style.width = '100%';
-            b.addEventListener('click', fn);
-            wrap.appendChild(b);
-            document.getElementById('examControls').appendChild(wrap);
-            return b;
-        }
-
-        // ---------- ใบงาน (เขียนบนกระดาษ แล้วดูเฉลย/ตรวจเอง) ----------
-        function renderWorksheet(items, regen) {
-            const body = document.getElementById('examBody');
-            body.innerHTML = '';
-            const marks = {};
-            const bar = mkEl('div', 'table-actions');
-            const bAll = mkEl('button', 'btn-sec', '👁️ เปิดเฉลยทั้งหมด');
-            const bNew = mkEl('button', 'btn-sec', '🔄 สุ่มชุดใหม่');
-            bar.appendChild(bAll); bar.appendChild(bNew);
-            const scoreEl = mkEl('div', 'ws-score');
-            body.appendChild(bar); body.appendChild(scoreEl);
-            const cards = [];
-            const upd = () => {
-                const vals = Object.values(marks);
-                scoreEl.textContent = 'คะแนนตรวจเอง: ' + vals.filter(v => v === 1).length + ' / ' + items.length + '  (ตรวจแล้ว ' + vals.length + ' ข้อ)';
-            };
-            items.forEach((it, i) => {
-                const card = mkEl('div', 'sent-card ws-item');
-                card.appendChild(mkEl('div', 'ws-sub', 'ข้อ ' + (i + 1)));
-                card.appendChild(mkEl('div', 'ws-main zh', it.main));
-                if (it.sub) card.appendChild(mkEl('div', 'ws-sub', it.sub));
-                const tools = mkEl('div', 'sent-tools');
-                const rev = mkEl('button', 'btn-sec', '🔍 ดูเฉลย');
-                rev.addEventListener('click', () => card.classList.toggle('open'));
-                tools.appendChild(rev);
-                if (it.speak) {
-                    const sp = mkEl('button', 'btn-sec', '🔊');
-                    sp.addEventListener('click', () => speakChinese(it.speak));
-                    tools.appendChild(sp);
-                }
-                card.appendChild(tools);
-                const ans = mkEl('div', 'ws-ans');
-                it.answer.forEach(([text, cls]) => ans.appendChild(mkEl('div', cls || '', text)));
-                card.appendChild(ans);
-                const mk = mkEl('div', 'ws-mark');
-                const ok = mkEl('button', 'btn-sec', '✅ เขียนถูก');
-                const no = mkEl('button', 'btn-sec', '❌ ผิด');
-                ok.addEventListener('click', () => { marks[i] = 1; ok.classList.add('on-ok'); no.classList.remove('on-no'); upd(); });
-                no.addEventListener('click', () => { marks[i] = 0; no.classList.add('on-no'); ok.classList.remove('on-ok'); upd(); });
-                mk.appendChild(ok); mk.appendChild(no);
-                card.appendChild(mk);
-                cards.push(card);
-                body.appendChild(card);
-            });
-            bAll.addEventListener('click', () => cards.forEach(c => c.classList.add('open')));
-            bNew.addEventListener('click', regen);
-            upd();
-        }
-
-        // ---------- แบบเลือกตอบ ----------
-        function runQuiz(items, regen) {
-            const body = document.getElementById('examBody');
-            let idx = 0, score = 0;
-            function show() {
-                body.innerHTML = '';
-                if (idx >= items.length) {
-                    body.appendChild(mkEl('div', 'ws-score', '🎉 จบแล้ว! คะแนน ' + score + ' / ' + items.length));
-                    const again = mkEl('button', 'btn-main', '🔄 เล่นอีกครั้ง (ชุดใหม่)');
-                    again.addEventListener('click', regen);
-                    body.appendChild(again);
-                    return;
-                }
-                const it = items[idx];
-                body.appendChild(mkEl('div', 'ws-score', 'ข้อ ' + (idx + 1) + ' / ' + items.length + '   คะแนน ' + score));
-                const card = mkEl('div', 'sent-card');
-                card.appendChild(mkEl('div', 'ws-main zh', it.main));
-                if (it.sub) card.appendChild(mkEl('div', 'ws-sub', it.sub));
-                if (it.speak) {
-                    const sp = mkEl('button', 'btn-sec', '🔊 ฟังเสียง');
-                    sp.style.marginTop = '8px';
-                    sp.addEventListener('click', () => speakChinese(it.speak));
-                    card.appendChild(sp);
-                }
-                const optBox = mkEl('div');
-                optBox.style.marginTop = '12px';
-                const fb = mkEl('div', 'info-box');
-                fb.style.display = 'none';
-                fb.style.marginTop = '12px';
-                const next = mkEl('button', 'btn-main', idx === items.length - 1 ? 'ดูคะแนน ▶' : 'ข้อต่อไป ▶');
-                next.style.display = 'none';
-                next.addEventListener('click', () => { idx++; show(); });
-                let done = false;
-                it.options.forEach(o => {
-                    const b = mkEl('button', 'quiz-opt', o);
-                    b.addEventListener('click', () => {
-                        if (done) return;
-                        done = true;
-                        const right = o === it.answer;
-                        if (right) score++;
-                        b.classList.add(right ? 'ok' : 'bad');
-                        if (!right) Array.from(optBox.children).forEach(x => { if (x.textContent === it.answer) x.classList.add('ok'); });
-                        fb.textContent = (right ? '✅ ถูกต้อง! ' : '❌ ผิด ') + (it.why || '');
-                        fb.style.display = 'block';
-                        next.style.display = 'block';
-                    });
-                    optBox.appendChild(b);
-                });
-                card.appendChild(optBox);
-                card.appendChild(fb);
-                card.appendChild(next);
-                body.appendChild(card);
-            }
-            show();
-        }
-
-        // ---------- 1. คำศัพท์ (จากเด็ค) ----------
-        function examVocab() {
-            setExamInfo('เห็นตัวจีน → เขียนพินอินและคำแปลลงกระดาษ แล้วกด "ดูเฉลย" และกด ✅/❌ เพื่อนับคะแนน');
-            const sel = addExamSelect('เลือกกล่องเด็ค', [['', '-- เลือกเด็ค --']].concat(appData.chapters.map(c => [c.id, c.name])));
-            const cnt = addExamSelect('จำนวนข้อ', [['10', '10 ข้อ'], ['20', '20 ข้อ'], ['30', '30 ข้อ']]);
-            cnt.value = '20';
-            const go = () => {
-                if (!sel.value) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนนะ!' });
-                const all = appData.words.filter(w => w.chapterId === sel.value);
-                if (all.length === 0) return Swal.fire({ icon: 'warning', text: 'กล่องนี้ยังไม่มีคำศัพท์!' });
-                const picked = shuffleArr(all).slice(0, parseInt(cnt.value));
-                renderWorksheet(picked.map(w => ({
-                    main: w.col1 || w.cn || '-', speak: w.col1 || w.cn,
-                    answer: [[w.col2 || w.pin || '-', 'ans-py'], [w.col4 || w.thMean || '-', 'ans-th']]
-                })), go);
-            };
-            addExamButton('เริ่ม / สุ่มชุดใหม่', go);
-        }
-
-        // ---------- 2. เลขจีน 1-10 ----------
-        const CN_D = '零一二三四五六七八九十';
-        const CN_P = ['líng', 'yī', 'èr', 'sān', 'sì', 'wǔ', 'liù', 'qī', 'bā', 'jiǔ', 'shí'];
-        function examNumbers() {
-            setExamInfo('เขียนบนกระดาษ แล้วกด "ดูเฉลย" ตรวจตัวอักษรและขีดให้ถูก (ระวัง 九 และ 十)');
-            const dir = addExamSelect('โจทย์', [['0', 'เลขอารบิก → เขียนตัวจีน'], ['1', 'ตัวจีน → เลขอารบิก + พินอิน']]);
-            const ord = addExamSelect('ลำดับ', [['0', 'เรียง 1 → 10'], ['1', 'สุ่ม']]);
-            const go = () => {
-                let list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-                if (ord.value === '1') list = shuffleArr(list);
-                renderWorksheet(list.map(n => dir.value === '0'
-                    ? { main: String(n), sub: 'เขียนเป็นเลขจีน', speak: CN_D[n], answer: [[CN_D[n], 'ans-zh zh'], [CN_P[n], 'ans-py']] }
-                    : { main: CN_D[n], sub: 'เลขอะไร / อ่านว่าอะไร', speak: CN_D[n], answer: [[String(n), 'ans-zh'], [CN_P[n], 'ans-py']] }
-                ), go);
-            };
-            addExamButton('เริ่ม / สุ่มชุดใหม่', go);
-            go();
-        }
-
-        // ---------- 3. ราคาสินค้า ----------
-        const CN_PY = { '零': 'líng', '一': 'yī', '二': 'èr', '两': 'liǎng', '三': 'sān', '四': 'sì', '五': 'wǔ', '六': 'liù', '七': 'qī', '八': 'bā', '九': 'jiǔ', '十': 'shí', '块': 'kuài', '毛': 'máo', '元': 'yuán', '角': 'jiǎo' };
-        function cnNum(n) {
-            if (n < 10) return CN_D[n];
-            if (n < 20) return '十' + (n % 10 ? CN_D[n % 10] : '');
-            return CN_D[Math.floor(n / 10)] + '十' + (n % 10 ? CN_D[n % 10] : '');
-        }
-        function cnPinyin(str) { return str.split('').map(ch => CN_PY[ch] || ch).join(' '); }
-        function makePrice() {
-            let kuai = Math.floor(Math.random() * 60) + 1;
-            let mao = Math.random() < 0.4 ? 0 : Math.floor(Math.random() * 9) + 1;
-            if (Math.random() < 0.15) { kuai = 0; mao = Math.floor(Math.random() * 9) + 1; }
-            let spoken = '', written = '', short = '';
-            if (kuai > 0) { spoken += (kuai === 2 ? '两' : cnNum(kuai)) + '块'; written += cnNum(kuai) + '元'; }
-            if (mao > 0) { spoken += (mao === 2 ? '两' : CN_D[mao]) + '毛'; written += CN_D[mao] + '角'; }
-            if (kuai > 0 && mao > 0) short = (kuai === 2 ? '两' : cnNum(kuai)) + '块' + CN_D[mao];
-            return { shown: '¥' + kuai + (mao ? '.' + mao + '0' : ''), spoken, written, short };
-        }
-        function examPrices() {
-            setExamInfo('เขียนราคาเป็นภาษาจีนลงกระดาษ แล้วกด "ดูเฉลย"\n块 (kuài) = หยวน (ภาษาพูด)  |  毛 (máo) = 1/10 หยวน  |  ภาษาเขียนใช้ 元 / 角\nเลข 2 ที่ตามด้วยหน่วย 块/毛 มักใช้ 两 เช่น 两块  |  พูดสั้นได้ เช่น 十二块五 (ละ 毛 ตัวท้าย)');
-            const go = () => {
-                const seen = new Set(), list = [];
-                while (list.length < 5) {
-                    const pr = makePrice();
-                    if (seen.has(pr.shown)) continue;
-                    seen.add(pr.shown); list.push(pr);
-                }
-                renderWorksheet(list.map(pr => {
-                    const ans = [[pr.spoken, 'ans-zh zh'], [cnPinyin(pr.spoken), 'ans-py']];
-                    if (pr.short) ans.push(['พูดสั้น: ' + pr.short, 'ans-th zh']);
-                    ans.push(['ภาษาเขียน: ' + pr.written, 'ans-th zh']);
-                    return { main: pr.shown, sub: 'เขียนเป็นราคาจีน', speak: pr.spoken, answer: ans };
-                }), go);
-            };
-            addExamButton('🔄 สุ่มชุดใหม่', go);
-            go();
-        }
-
-        // ---------- 4. การผันเสียงของ 一 ----------
-        const YI_ITEMS = [
-            ['一个', 'yí gè', 'yí', 'ตัวถัดไป (个) เสียง 4 → yí'],
-            ['一天', 'yì tiān', 'yì', 'ตัวถัดไป (天) เสียง 1 → yì'],
-            ['一起', 'yì qǐ', 'yì', 'ตัวถัดไป (起) เสียง 3 → yì'],
-            ['一年', 'yì nián', 'yì', 'ตัวถัดไป (年) เสียง 2 → yì'],
-            ['第一', 'dì yī', 'yī', 'ลำดับที่ / อยู่ท้ายคำ → yī'],
-            ['星期一', 'xīngqī yī', 'yī', 'อยู่ท้ายคำ → yī'],
-            ['一月', 'yī yuè', 'yī', 'ชื่อเดือนใช้ yī'],
-            ['一号', 'yī hào', 'yī', 'วันที่ใช้ yī'],
-            ['十一', 'shí yī', 'yī', 'เลขอยู่ท้าย → yī'],
-            ['一点', 'yì diǎn', 'yì', 'ตัวถัดไป (点) เสียง 3 → yì'],
-            ['一块', 'yí kuài', 'yí', 'ตัวถัดไป (块) เสียง 4 → yí'],
-            ['一下', 'yí xià', 'yí', 'ตัวถัดไป (下) เสียง 4 → yí'],
-            ['一些', 'yì xiē', 'yì', 'ตัวถัดไป (些) เสียง 1 → yì'],
-            ['一杯', 'yì bēi', 'yì', 'ตัวถัดไป (杯) เสียง 1 → yì'],
-            ['一共', 'yí gòng', 'yí', 'ตัวถัดไป (共) เสียง 4 → yí'],
-            ['一直', 'yì zhí', 'yì', 'ตัวถัดไป (直) เสียง 2 → yì'],
-            ['一定', 'yí dìng', 'yí', 'ตัวถัดไป (定) เสียง 4 → yí'],
-            ['一样', 'yí yàng', 'yí', 'ตัวถัดไป (样) เสียง 4 → yí'],
-            ['一半', 'yí bàn', 'yí', 'ตัวถัดไป (半) เสียง 4 → yí'],
-            ['一本', 'yì běn', 'yì', 'ตัวถัดไป (本) เสียง 3 → yì'],
-            ['一件', 'yí jiàn', 'yí', 'ตัวถัดไป (件) เสียง 4 → yí'],
-            ['一次', 'yí cì', 'yí', 'ตัวถัดไป (次) เสียง 4 → yí'],
-            ['一百', 'yì bǎi', 'yì', 'ตัวถัดไป (百) เสียง 3 → yì'],
-            ['一会儿', 'yí huìr', 'yí', 'ตัวถัดไป (会) เสียง 4 → yí'],
-            ['一', 'yī', 'yī', 'ออกเสียงเดี่ยว / นับเลข → yī']
-        ];
-        function examYi() {
-            setExamInfo('หลักการผันเสียงของ 一:\n• ตามด้วยเสียง 4 → yí   • ตามด้วยเสียง 1, 2, 3 → yì\n• อยู่ท้ายคำ / ลำดับที่ / วันที่-เดือน / นับเลข → yī\nแถม: 不 ก็ผันเสียงคล้ายกัน ตามด้วยเสียง 4 → bú เช่น 不是 bú shì');
-            const go = () => {
-                runQuiz(shuffleArr(YI_ITEMS).slice(0, 10).map(([zh, full, ans, why]) => ({
-                    main: zh, sub: 'ออกเสียง 一 ในคำนี้ว่าอย่างไร?', speak: zh,
-                    options: ['yī', 'yí', 'yì'], answer: ans, why: zh + ' = ' + full + ' (' + why + ')'
-                })), go);
-            };
-            addExamButton('🔄 เริ่มชุดใหม่', go);
-            go();
-        }
-
-        // ---------- 5. สถานที่ ----------
-        const PLACES = [
-            ['学校', 'xuéxiào', 'โรงเรียน'], ['医院', 'yīyuàn', 'โรงพยาบาล'], ['银行', 'yínháng', 'ธนาคาร'],
-            ['超市', 'chāoshì', 'ซูเปอร์มาร์เก็ต'], ['饭店', 'fàndiàn', 'ร้านอาหาร / ภัตตาคาร'], ['公园', 'gōngyuán', 'สวนสาธารณะ'],
-            ['机场', 'jīchǎng', 'สนามบิน'], ['图书馆', 'túshūguǎn', 'ห้องสมุด'], ['邮局', 'yóujú', 'ที่ทำการไปรษณีย์'],
-            ['商店', 'shāngdiàn', 'ร้านค้า'], ['火车站', 'huǒchēzhàn', 'สถานีรถไฟ'], ['洗手间', 'xǐshǒujiān', 'ห้องน้ำ'],
-            ['教室', 'jiàoshì', 'ห้องเรียน'], ['市场', 'shìchǎng', 'ตลาด'], ['书店', 'shūdiàn', 'ร้านหนังสือ'],
-            ['药店', 'yàodiàn', 'ร้านขายยา'], ['电影院', 'diànyǐngyuàn', 'โรงภาพยนตร์'], ['宾馆', 'bīnguǎn', 'โรงแรม'],
-            ['公司', 'gōngsī', 'บริษัท'], ['家', 'jiā', 'บ้าน']
-        ];
-        function examPlaces() {
-            setExamInfo('เขียนคำตอบลงกระดาษ แล้วกด "ดูเฉลย" ตรวจตัวจีนและพินอิน');
-            const dir = addExamSelect('โจทย์', [['0', 'ดูคำไทย → เขียนตัวจีน + พินอิน'], ['1', 'ดูตัวจีน → เขียนพินอิน + คำแปล']]);
-            const go = () => {
-                renderWorksheet(shuffleArr(PLACES).slice(0, 10).map(([zh, py, th]) => dir.value === '0'
-                    ? { main: th, sub: 'เขียนเป็นภาษาจีน', speak: zh, answer: [[zh, 'ans-zh zh'], [py, 'ans-py']] }
-                    : { main: zh, sub: 'เขียนพินอินและคำแปล', speak: zh, answer: [[py, 'ans-py'], [th, 'ans-th']] }
-                ), go);
-            };
-            addExamButton('เริ่ม / สุ่มชุดใหม่', go);
-            go();
-        }
-
-        // ---------- 6. เขียนบรรยายภาพ ----------
-        const SCENES = [
-            ['👦📖', 'เด็กผู้ชายกับหนังสือ', '他在看书。', 'tā zài kàn shū', 'เขากำลังอ่านหนังสือ'],
-            ['👧🍚', 'เด็กผู้หญิงกับข้าว', '她在吃饭。', 'tā zài chī fàn', 'เธอกำลังกินข้าว'],
-            ['🏥👩‍⚕️', 'หมอที่โรงพยาบาล', '医生在医院。', 'yīshēng zài yīyuàn', 'หมออยู่ที่โรงพยาบาล'],
-            ['🛒👩', 'ผู้หญิงที่ซูเปอร์มาร์เก็ต', '她在超市买东西。', 'tā zài chāoshì mǎi dōngxi', 'เธอซื้อของที่ซูเปอร์มาร์เก็ต'],
-            ['🐱🛋️', 'แมวกับโซฟา', '猫在沙发上。', 'māo zài shāfā shàng', 'แมวอยู่บนโซฟา'],
-            ['📱👧', 'เด็กผู้หญิงกับมือถือ', '她在玩手机。', 'tā zài wán shǒujī', 'เธอกำลังเล่นมือถือ'],
-            ['🏃‍♂️🌳', 'ผู้ชายวิ่งในสวน', '他在公园跑步。', 'tā zài gōngyuán pǎobù', 'เขาวิ่งในสวนสาธารณะ'],
-            ['🎵🎧', 'ฟังเพลง', '她在听音乐。', 'tā zài tīng yīnyuè', 'เธอกำลังฟังเพลง'],
-            ['☕👨', 'ผู้ชายกับกาแฟ', '他在喝咖啡。', 'tā zài hē kāfēi', 'เขากำลังดื่มกาแฟ'],
-            ['🚌👦', 'เด็กผู้ชายกับรถเมล์', '他坐公共汽车。', 'tā zuò gōnggòng qìchē', 'เขานั่งรถเมล์'],
-            ['👩‍🏫📚', 'ครูกับหนังสือ', '老师在教室里。', 'lǎoshī zài jiàoshì lǐ', 'ครูอยู่ในห้องเรียน'],
-            ['🍎🍌', 'แอปเปิ้ลและกล้วย', '我有苹果和香蕉。', 'wǒ yǒu píngguǒ hé xiāngjiāo', 'ฉันมีแอปเปิ้ลกับกล้วย']
-        ];
-        function examPictures() {
-            setExamInfo('ดูภาพ (อีโมจิ) แล้วเขียนประโยคจีนสั้น ๆ บรรยายภาพลงกระดาษ จากนั้นกด "ดูเฉลย" เทียบกับประโยคตัวอย่าง\n(เขียนต่างจากตัวอย่างได้ ถ้าไวยากรณ์ถูก)');
-            const go = () => {
-                renderWorksheet(shuffleArr(SCENES).slice(0, 5).map(([pic, hint, zh, py, th]) => ({
-                    main: pic, sub: 'ภาพ: ' + hint + ' — เขียนประโยคจีนบรรยายภาพนี้', speak: zh,
-                    answer: [['ตัวอย่าง: ' + zh, 'ans-zh zh'], [py, 'ans-py'], [th, 'ans-th']]
-                })), go);
-            };
-            addExamButton('🔄 สุ่มชุดใหม่', go);
-            go();
-        }
-
-        // ---------- 7. เรียงประโยค ----------
-        const ORDER_ITEMS = [
-            [['我', '在', '学校', '学习', '汉语'], 'wǒ zài xuéxiào xuéxí hànyǔ', 'ฉันเรียนภาษาจีนที่โรงเรียน'],
-            [['他', '不', '是', '老师'], 'tā bú shì lǎoshī', 'เขาไม่ใช่ครู'],
-            [['我们', '去', '公园', '玩'], 'wǒmen qù gōngyuán wán', 'พวกเราไปเที่ยวสวนสาธารณะ'],
-            [['她', '在', '看', '书'], 'tā zài kàn shū', 'เธอกำลังอ่านหนังสือ'],
-            [['这', '是', '我', '的', '书'], 'zhè shì wǒ de shū', 'นี่คือหนังสือของฉัน'],
-            [['你', '想', '吃', '什么'], 'nǐ xiǎng chī shénme', 'คุณอยากกินอะไร'],
-            [['我', '要', '买', '一个', '苹果'], 'wǒ yào mǎi yí gè píngguǒ', 'ฉันจะซื้อแอปเปิ้ลหนึ่งลูก'],
-            [['他', '住', '在', '北京'], 'tā zhù zài běijīng', 'เขาอาศัยอยู่ที่ปักกิ่ง'],
-            [['今天', '天气', '很', '好'], 'jīntiān tiānqì hěn hǎo', 'วันนี้อากาศดีมาก'],
-            [['银行', '在', '超市', '旁边'], 'yínháng zài chāoshì pángbiān', 'ธนาคารอยู่ข้างซูเปอร์มาร์เก็ต'],
-            [['我', '每天', '喝', '咖啡'], 'wǒ měitiān hē kāfēi', 'ฉันดื่มกาแฟทุกวัน'],
-            [['请问', '洗手间', '在', '哪儿'], 'qǐngwèn xǐshǒujiān zài nǎr', 'ขอถามหน่อย ห้องน้ำอยู่ที่ไหน'],
-            [['我', '不', '喝', '茶'], 'wǒ bù hē chá', 'ฉันไม่ดื่มชา'],
-            [['这个', '多少', '钱'], 'zhège duōshao qián', 'อันนี้ราคาเท่าไหร่']
-        ];
-        function examOrder() {
-            setExamInfo('แตะคำด้านล่างเพื่อเรียงให้เป็นประโยคที่ถูกต้อง (แตะคำในกรอบเพื่อเอากลับ) แล้วกด "ตรวจ"\nโครงสร้างหลัก: ประธาน + เวลา + สถานที่ + กริยา + กรรม');
-            const go = () => runOrder(shuffleArr(ORDER_ITEMS).slice(0, 10), go);
-            addExamButton('🔄 เริ่มชุดใหม่', go);
-            go();
-        }
-        function runOrder(items, regen) {
-            const body = document.getElementById('examBody');
-            let idx = 0, score = 0;
-            function show() {
-                body.innerHTML = '';
-                if (idx >= items.length) {
-                    body.appendChild(mkEl('div', 'ws-score', '🎉 จบแล้ว! คะแนน ' + score + ' / ' + items.length));
-                    const again = mkEl('button', 'btn-main', '🔄 เล่นอีกครั้ง (ชุดใหม่)');
-                    again.addEventListener('click', regen);
-                    body.appendChild(again);
-                    return;
-                }
-                const [words, py, th] = items[idx];
-                const correct = words.join('');
-                body.appendChild(mkEl('div', 'ws-score', 'ข้อ ' + (idx + 1) + ' / ' + items.length + '   คะแนน ' + score));
-                const card = mkEl('div', 'sent-card');
-                card.appendChild(mkEl('div', 'ws-sub', 'เรียงให้เป็นประโยค — ความหมาย: ' + th));
-                const zone = mkEl('div', 'answer-zone');
-                const pool = mkEl('div');
-                const fb = mkEl('div', 'info-box');
-                fb.style.display = 'none';
-                const tools = mkEl('div', 'sent-tools');
-                const bCheck = mkEl('button', 'btn-main', '✔️ ตรวจ');
-                const bClear = mkEl('button', 'btn-sec', '↩️ ล้าง');
-                const next = mkEl('button', 'btn-main', idx === items.length - 1 ? 'ดูคะแนน ▶' : 'ข้อต่อไป ▶');
-                next.style.display = 'none';
-                tools.appendChild(bCheck); tools.appendChild(bClear);
-
-                let tiles = words.map((w, i) => ({ w, used: false }));
-                let tries = 0;
-                do { tiles = shuffleArr(tiles); tries++; } while (tiles.map(t => t.w).join('') === correct && words.length > 1 && tries < 10);
-                let chosen = [], locked = false;
-
-                function draw() {
-                    zone.innerHTML = ''; pool.innerHTML = '';
-                    chosen.forEach(t => {
-                        const b = mkEl('button', 'chip zh', t.w);
-                        b.addEventListener('click', () => { if (locked) return; t.used = false; chosen = chosen.filter(x => x !== t); draw(); });
-                        zone.appendChild(b);
-                    });
-                    tiles.forEach(t => {
-                        if (t.used) return;
-                        const b = mkEl('button', 'chip zh', t.w);
-                        b.addEventListener('click', () => { if (locked) return; t.used = true; chosen.push(t); draw(); });
-                        pool.appendChild(b);
-                    });
-                }
-                bClear.addEventListener('click', () => { if (locked) return; tiles.forEach(t => t.used = false); chosen = []; draw(); });
-                bCheck.addEventListener('click', () => {
-                    if (locked || chosen.length === 0) return;
-                    locked = true;
-                    const ok = chosen.map(t => t.w).join('') === correct;
-                    if (ok) score++;
-                    fb.textContent = (ok ? '✅ ถูกต้อง! ' : '❌ ยังไม่ถูก เฉลย: ') + correct + '  (' + py + ')';
-                    fb.style.display = 'block';
-                    next.style.display = 'block';
-                    speakChinese(correct);
-                });
-                next.addEventListener('click', () => { idx++; show(); });
-
-                card.appendChild(zone); card.appendChild(pool); card.appendChild(tools); card.appendChild(fb); card.appendChild(next);
-                body.appendChild(card);
-                draw();
-            }
-            show();
-        }
-
-        // ---------- 8. เลือก 是 / 不是 ----------
-        const SHIBU_ITEMS = [
-            ['我（ ）学生。', '是', 'ฉันเป็นนักเรียน'],
-            ['他（ ）老师。', '不是', 'เขาไม่ใช่ครู'],
-            ['这（ ）我的书。', '是', 'นี่คือหนังสือของฉัน'],
-            ['那（ ）苹果，是香蕉。', '不是', 'นั่นไม่ใช่แอปเปิ้ล เป็นกล้วย'],
-            ['她（ ）泰国人。', '是', 'เธอเป็นคนไทย'],
-            ['我（ ）中国人，我是泰国人。', '不是', 'ฉันไม่ใช่คนจีน ฉันเป็นคนไทย'],
-            ['你（ ）医生吗？', '是', 'คุณเป็นหมอใช่ไหม'],
-            ['这（ ）我的手机。', '不是', 'นี่ไม่ใช่มือถือของฉัน'],
-            ['他们（ ）朋友。', '是', 'พวกเขาเป็นเพื่อนกัน'],
-            ['今天（ ）星期五，是星期六。', '不是', 'วันนี้ไม่ใช่วันศุกร์ เป็นวันเสาร์'],
-            ['我（ ）老师，我是学生。', '不是', 'ฉันไม่ใช่ครู ฉันเป็นนักเรียน'],
-            ['那（ ）医院。', '是', 'นั่นคือโรงพยาบาล'],
-            ['这（ ）咖啡，是茶。', '不是', 'นี่ไม่ใช่กาแฟ เป็นชา'],
-            ['他（ ）我的哥哥。', '是', 'เขาเป็นพี่ชายของฉัน']
-        ];
-        function examShiBu() {
-            setExamInfo('อ่านประโยคและความหมายภาษาไทย แล้วเลือก 是 (เป็น/คือ) หรือ 不是 (ไม่ใช่) ให้เข้ากับช่องว่าง\nจำไว้: 不 + เสียง 4 → อ่านเป็น bú  (不是 = bú shì)');
-            const go = () => {
-                runQuiz(shuffleArr(SHIBU_ITEMS).slice(0, 10).map(([sent, ans, th]) => ({
-                    main: sent, sub: 'ความหมาย: ' + th, options: ['是', '不是'], answer: ans,
-                    why: sent.replace('（ ）', ans) + (ans === '不是' ? '  (不是 อ่านว่า bú shì)' : '  (是 อ่านว่า shì)')
-                })), go);
-            };
-            addExamButton('🔄 เริ่มชุดใหม่', go);
-            go();
-        }
-
-        // Initialize
-        (async () => {
-            try {
-                if (window.claude && window.claude.use) {
-                    const smp = await window.claude.use('sample');
-                    if (smp) {
-                        aiSample = smp;
-                        document.getElementById('btnAiGen').style.display = 'block';
-                        document.getElementById('aiHelp').style.display = 'inline';
-                        document.getElementById('manualHelp').style.display = 'none';
-                        document.getElementById('manualFlow').open = false;
-                    }
-                }
-            } catch (e) {}
-        })();
-        document.getElementById('tableBody').addEventListener('input', e => {
-            if (e.target.classList.contains('in-col1')) ensureSpareRow();
+    });
+}
+function updateDropdowns() {
+    const adminSelect = document.getElementById('chapterSelectAdmin');
+    const studySelect = document.getElementById('chapterSelectStudy');
+    const dictSelect = document.getElementById('chapterSelectDictation');
+    const tableSelect = document.getElementById('chapterSelectTable');
+    const prevTable = tableSelect.value;
+    const sentSelect = document.getElementById('chapterSelectSentence');
+    const prevSent = sentSelect.value;
+    const deckListAdmin = document.getElementById('deckListAdmin');
+    const defaultOpt = '<option value="">-- กรุณาเลือกกล่องเด็ค --</option>';
+    adminSelect.innerHTML = studySelect.innerHTML = dictSelect.innerHTML = tableSelect.innerHTML = sentSelect.innerHTML = defaultOpt;
+    deckListAdmin.innerHTML = '';
+    appData.chapters.forEach(ch => {
+        const opt = `<option value="${ch.id}">${ch.name}</option>`;
+        adminSelect.innerHTML += opt; studySelect.innerHTML += opt; dictSelect.innerHTML += opt;
+        tableSelect.innerHTML += opt; sentSelect.innerHTML += opt;
+        const wordCount = appData.words.filter(w => w.chapterId === ch.id).length;
+        deckListAdmin.innerHTML += `
+            <div class="deck-item">
+                <span><strong>${ch.name}</strong> <small>(${wordCount} ข้อมูล)</small></span>
+                <button class="btn-del-deck" onclick="deleteChapter('${ch.id}', '${ch.name}')">ลบ</button>
+            </div>`;
+    });
+    tableSelect.value = prevTable;
+    sentSelect.value = prevSent;
+}
+
+// ===== ตารางคำศัพท์ =====
+function renderWordTable() {
+    const chapterId = document.getElementById('chapterSelectTable').value;
+    const tbody = document.getElementById('viewTableBody');
+    tbody.innerHTML = '';
+    const words = chapterId ? appData.words.filter(w => w.chapterId === chapterId) : [];
+    if (words.length === 0) {
+        const tr = document.createElement('tr'), td = document.createElement('td');
+        td.colSpan = 6; td.style.textAlign = 'center'; td.style.color = '#64748b';
+        td.textContent = chapterId ? 'กล่องนี้ยังไม่มีคำศัพท์' : 'เลือกกล่องเด็คเพื่อดูตาราง';
+        tr.appendChild(td); tbody.appendChild(tr);
+        return;
+    }
+    words.forEach((w, i) => {
+        const zh = w.col1 || w.cn || '-';
+        const cells = [[i + 1, ''], [zh, 'zh'], [w.col2 || w.pin || '-', 'pin'], [w.col3 || w.thRead || '-', ''], [w.col4 || w.thMean || '-', '']];
+        const tr = document.createElement('tr');
+        cells.forEach(([text, cls]) => {
+            const td = document.createElement('td');
+            td.textContent = text; if (cls) td.className = cls;
+            tr.appendChild(td);
         });
-        updateDropdowns();
-        addMultipleRows(5);
-    </script>
+        const tdBtn = document.createElement('td'), btn = document.createElement('button');
+        btn.className = 'btn-say'; btn.textContent = '🔊';
+        btn.addEventListener('click', () => speakChinese(zh));
+        tdBtn.appendChild(btn); tr.appendChild(tdBtn);
+        tbody.appendChild(tr);
+    });
+}
+
+// ===== แต่งประโยค / บทสนทนา =====
+let aiSample = null;
+const hasZh = t => /[\u4e00-\u9fff]/.test(t || '');
+
+function makeSentPrompt() {
+    const chapterId = document.getElementById('chapterSelectSentence').value;
+    if (!chapterId) { Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนนะ!' }); return null; }
+    const all = appData.words.filter(w => w.chapterId === chapterId);
+    if (all.length === 0) { Swal.fire({ icon: 'warning', text: 'กล่องนี้ยังไม่มีคำศัพท์!' }); return null; }
+    const nWords = parseInt(document.getElementById('sentWordCount').value);
+    const nSent = parseInt(document.getElementById('sentCount').value);
+    const nDlg = parseInt(document.getElementById('dlgCount').value);
+    if (nSent === 0 && nDlg === 0) { Swal.fire({ icon: 'info', text: 'เลือกอย่างน้อย 1 อย่าง (ประโยคเดี่ยว หรือ บทสนทนา)' }); return null; }
+    const picked = all.slice().sort(() => Math.random() - 0.5).slice(0, nWords);
+    const list = picked.map(w => '- ' + (w.col1 || w.cn || '') + ' (' + (w.col2 || w.pin || '-') + ') = ' + (w.col4 || w.thMean || '-')).join('\n');
+    let req = '';
+    if (nSent > 0) req += '- ประโยคเดี่ยว ' + nSent + ' ประโยค\n';
+    if (nDlg > 0) req += '- บทสนทนา ' + nDlg + ' บท (บทละ 4 บรรทัด สลับผู้พูด A และ B)\n';
+    return 'ช่วยแต่งประโยคภาษาจีนและบทสนทนาสั้น ๆ สำหรับคนไทยที่กำลังเรียนภาษาจีน โดยใช้คำศัพท์ต่อไปนี้ (ทุกประโยคใช้อย่างน้อย 1 คำจากรายการ และพยายามใช้ให้ครบทุกคำ):\n\n' +
+        list + '\n\nความต้องการ:\n' + req +
+        '- ประโยคสั้นมาก ประโยคละไม่เกิน 8 ตัวอักษรจีน (ทุกบรรทัดในบทสนทนาก็สั้นเช่นกัน)\n- ไวยากรณ์ง่าย ใช้ในชีวิตประจำวัน\n- พินอินต้องมีวรรณยุกต์ และคำแปลเป็นภาษาไทย\n\n' +
+        'ตอบเป็น JSON อย่างเดียว ห้ามมีข้อความอื่นนอกจาก JSON ตามรูปแบบนี้:\n' +
+        '{"sentences":[{"zh":"(ประโยคจีน)","pinyin":"(พินอิน)","th":"(คำแปลไทย)"}],"dialogues":[{"title":"(หัวข้อ)","lines":[{"speaker":"A","zh":"(ประโยคจีน)","pinyin":"(พินอิน)","th":"(คำแปลไทย)"}]}]}';
+}
+function buildSentPrompt() {
+    const prompt = makeSentPrompt();
+    if (!prompt) return;
+    document.getElementById('sentPrompt').value = prompt;
+    document.getElementById('sentPromptWrap').style.display = 'block';
+}
+function copySentPrompt() {
+    const ta = document.getElementById('sentPrompt');
+    const done = () => Swal.fire({ icon: 'success', text: 'คัดลอกแล้ว! ไปวางใน AI ได้เลย', timer: 1500, showConfirmButton: false });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(ta.value).then(done).catch(() => { ta.select(); document.execCommand('copy'); done(); });
+    } else { ta.select(); document.execCommand('copy'); done(); }
+}
+function addSentencesFromData(chapterId, data) {
+    const mkId = () => Date.now().toString() + Math.random().toString(36).slice(2, 7);
+    let count = 0;
+    (data && Array.isArray(data.sentences) ? data.sentences : []).forEach(x => {
+        if (x && hasZh(x.zh)) {
+            appData.sentences.push({ id: mkId(), chapterId, type: 'sentence', zh: String(x.zh), pinyin: String(x.pinyin || ''), th: String(x.th || '') });
+            count++;
+        }
+    });
+    (data && Array.isArray(data.dialogues) ? data.dialogues : []).forEach(d => {
+        if (d && Array.isArray(d.lines)) {
+            const lines = d.lines.filter(l => l && hasZh(l.zh)).map(l => ({
+                speaker: String(l.speaker || ''), zh: String(l.zh), pinyin: String(l.pinyin || ''), th: String(l.th || '')
+            }));
+            if (lines.length) {
+                appData.sentences.push({ id: mkId(), chapterId, type: 'dialogue', title: String(d.title || 'บทสนทนา'), lines });
+                count++;
+            }
+        }
+    });
+    return count;
+}
+function importSentences() {
+    const chapterId = document.getElementById('chapterSelectSentence').value;
+    if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนนะ!' });
+    const raw = document.getElementById('sentImport').value;
+    if (raw.includes('ช่วยแต่งประโยคภาษาจีนและบทสนทนา')) {
+        return Swal.fire({ icon: 'warning', title: 'นี่คือคำสั่ง ไม่ใช่คำตอบ', text: 'ช่องนี้ใช้วาง "คำตอบ" ที่ AI ตอบกลับมา กรุณานำคำสั่งไปวางใน AI ก่อน แล้วค่อยคัดลอกคำตอบมาวางที่นี่' });
+    }
+    const start = raw.indexOf('{'), end = raw.lastIndexOf('}');
+    if (start < 0 || end < start) return Swal.fire({ icon: 'error', text: 'ไม่พบข้อมูล JSON กรุณาวางคำตอบจาก AI ให้ครบ' });
+    let data;
+    try { data = JSON.parse(raw.slice(start, end + 1)); }
+    catch (e) { return Swal.fire({ icon: 'error', text: 'อ่าน JSON ไม่ได้ ลองให้ AI ตอบใหม่เป็น JSON อย่างเดียว' }); }
+    const count = addSentencesFromData(chapterId, data);
+    if (count === 0) return Swal.fire({ icon: 'warning', text: 'ไม่พบประโยคจีนในข้อมูลที่วาง (ต้องวางคำตอบจริงจาก AI ไม่ใช่ตัวอย่างในคำสั่ง)' });
+    saveData();
+    document.getElementById('sentImport').value = '';
+    renderSentences();
+    Swal.fire({ icon: 'success', text: 'นำเข้าสำเร็จ ' + count + ' รายการ!' });
+}
+async function aiGenerateSentences() {
+    if (!aiSample) return;
+    const chapterId = document.getElementById('chapterSelectSentence').value;
+    const prompt = makeSentPrompt();
+    if (!prompt) return;
+    const btn = document.getElementById('btnAiGen');
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '⏳ AI กำลังแต่งประโยค... (รอสักครู่)';
+    try {
+        const data = await aiSample.json(prompt, { cache: false });
+        const count = addSentencesFromData(chapterId, data);
+        if (count === 0) {
+            Swal.fire({ icon: 'warning', text: 'AI ตอบกลับมาแต่ไม่พบประโยคจีน ลองกดอีกครั้ง' });
+        } else {
+            saveData(); renderSentences();
+            Swal.fire({ icon: 'success', text: 'AI แต่งให้แล้ว ' + count + ' รายการ!', timer: 1800, showConfirmButton: false });
+        }
+    } catch (err) {
+        const code = err && err.code;
+        let msg = 'AI ตอบกลับไม่สำเร็จ ลองกดใหม่อีกครั้ง';
+        if (code === 'not_granted') msg = 'ยังไม่ได้อนุญาตให้หน้านี้ใช้ AI';
+        else if (code === 'rate_limited') msg = 'ใช้งานถี่เกินไป รอสักครู่แล้วลองใหม่';
+        Swal.fire({ icon: 'error', text: msg });
+    } finally {
+        btn.disabled = false;
+        btn.textContent = label;
+    }
+}
+
+// ===== สำรอง / กู้คืน =====
+function showBackup() {
+    const ta = document.getElementById('backupText');
+    ta.value = JSON.stringify(appData);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) {}
+    Swal.fire({ icon: 'success', text: ok ? 'คัดลอกข้อมูลสำรองแล้ว!' : 'แสดงข้อมูลสำรองแล้ว กรุณาคัดลอกจากช่องด้วยตนเอง', timer: 1800, showConfirmButton: false });
+}
+function restoreBackup() {
+    let data;
+    try { data = JSON.parse(document.getElementById('backupText').value); }
+    catch (e) { return Swal.fire({ icon: 'error', text: 'ข้อมูลสำรองไม่ถูกต้อง' }); }
+    if (!data || !Array.isArray(data.chapters) || !Array.isArray(data.words)) {
+        return Swal.fire({ icon: 'error', text: 'ไม่พบข้อมูลเด็คและคำศัพท์ในข้อมูลที่วาง' });
+    }
+    Swal.fire({
+        title: 'กู้คืนข้อมูล?', text: 'ข้อมูลปัจจุบันในที่นี้จะถูกแทนที่ทั้งหมด', icon: 'warning',
+        showCancelButton: true, confirmButtonColor: '#cc0000', confirmButtonText: 'กู้คืนเลย', cancelButtonText: 'ยกเลิก'
+    }).then(r => {
+        if (r.isConfirmed) {
+            appData = { chapters: data.chapters, words: data.words, sentences: Array.isArray(data.sentences) ? data.sentences : [] };
+            saveData(); updateDropdowns();
+            Swal.fire({ icon: 'success', text: 'กู้คืนข้อมูลสำเร็จ!', timer: 1500, showConfirmButton: false });
+        }
+    });
+}
+
+function mkEl(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+}
+
+function renderSentences() {
+    const chapterId = document.getElementById('chapterSelectSentence').value;
+    const box = document.getElementById('sentList');
+    box.innerHTML = '';
+    const items = chapterId ? appData.sentences.filter(x => x.chapterId === chapterId) : [];
+    if (items.length === 0) {
+        box.appendChild(mkEl('p', '', chapterId ? 'ยังไม่มีประโยคในเด็คนี้' : 'เลือกกล่องเด็คเพื่อดูประโยคที่บันทึกไว้'));
+        box.lastChild.style.color = '#64748b';
+        return;
+    }
+    items.forEach(item => {
+        const card = mkEl('div', 'sent-card');
+        card.addEventListener('click', () => card.classList.toggle('show'));
+        const del = mkEl('button', 'sent-del', '✕');
+        del.addEventListener('click', e => {
+            e.stopPropagation();
+            appData.sentences = appData.sentences.filter(x => x.id !== item.id);
+            saveData(); renderSentences();
+        });
+        card.appendChild(del);
+        const lines = item.type === 'dialogue' ? item.lines : [item];
+        if (item.type === 'dialogue') card.appendChild(mkEl('div', 'sent-title', '💬 ' + item.title));
+        lines.forEach(l => {
+            const row = mkEl('div', item.type === 'dialogue' ? 'sent-line' : '');
+            const zh = mkEl('div', 'sent-zh');
+            if (l.speaker) zh.appendChild(mkEl('span', 'sent-spk', l.speaker));
+            zh.appendChild(document.createTextNode(l.zh));
+            row.appendChild(zh);
+            row.appendChild(mkEl('div', 'sent-pin', l.pinyin));
+            row.appendChild(mkEl('div', 'sent-th', l.th));
+            card.appendChild(row);
+        });
+        const tools = mkEl('div', 'sent-tools');
+        const say = mkEl('button', 'speak-btn', item.type === 'dialogue' ? '🔊 ฟังทั้งบท' : '🔊 ฟังเสียง');
+        say.style.margin = '0';
+        say.addEventListener('click', e => {
+            e.stopPropagation();
+            window.speechSynthesis.cancel();
+            setTimeout(() => { lines.forEach(l => { if (hasZh(l.zh)) speakChinese(l.zh); }); }, 150);
+        });
+        tools.appendChild(say);
+        card.appendChild(tools);
+        box.appendChild(card);
+    });
+}
+function toggleSentTrans() {
+    const hidden = document.getElementById('sentList').classList.toggle('hide-trans');
+    document.getElementById('btnToggleTrans').textContent = hidden ? '👀 แสดงพินอิน/คำแปลทั้งหมด' : '🙈 ซ่อนพินอิน/คำแปล (กดการ์ดเพื่อดู)';
+}
+function clearSentences() {
+    const chapterId = document.getElementById('chapterSelectSentence').value;
+    if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนนะ!' });
+    Swal.fire({
+        title: 'แน่ใจหรือไม่?', text: 'ลบประโยคและบทสนทนาทั้งหมดในเด็คนี้?', icon: 'warning',
+        showCancelButton: true, confirmButtonColor: '#cc0000', confirmButtonText: 'ลบเลย!', cancelButtonText: 'ยกเลิก'
+    }).then(r => {
+        if (r.isConfirmed) {
+            appData.sentences = appData.sentences.filter(x => x.chapterId !== chapterId);
+            saveData(); renderSentences();
+        }
+    });
+}
+
+// ===== เพิ่มคำศัพท์ =====
+function addTableRow() {
+    const tbody = document.getElementById('tableBody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td style="text-align:center;">-</td>
+        <td><input type="text" class="in-col1" placeholder="เช่น 你好" onpaste="handlePasteOnInput(event, this)"></td>
+        <td><input type="text" class="in-col2" placeholder="nǐ hǎo"></td>
+        <td><input type="text" class="in-col3" placeholder="คำทักทาย"></td>
+        <td><input type="text" class="in-col4" placeholder="สวัสดี"></td>
+        <td style="text-align:center;"><button class="btn-del-row" onclick="removeRow(this)">✕</button></td>`;
+    tbody.appendChild(tr); updateRowNumbers();
+}
+function addMultipleRows(count) { for (let i = 0; i < count; i++) addTableRow(); }
+function removeRow(btn) { btn.closest('tr').remove(); updateRowNumbers(); }
+function updateRowNumbers() { document.querySelectorAll('#tableBody tr').forEach((row, i) => row.children[0].innerText = i + 1); }
+function clearEmptyRows() {
+    document.querySelectorAll('#tableBody tr').forEach(row => { if (!row.querySelector('.in-col1').value.trim()) row.remove(); });
+    updateRowNumbers();
+}
+function handlePasteOnInput(e, inputElem) {
+    const clip = (e.clipboardData || window.clipboardData).getData('text');
+    if (clip && clip.includes('\t')) {
+        e.preventDefault();
+        const lines = clip.trim().split('\n');
+        let targetRow = inputElem.closest('tr');
+        lines.forEach(line => {
+            const cols = line.split('\t');
+            if (cols.length >= 2) {
+                if (!targetRow) { addTableRow(); targetRow = document.querySelector('#tableBody tr:last-child'); }
+                targetRow.querySelector('.in-col1').value = cols[0] || '';
+                targetRow.querySelector('.in-col2').value = cols[1] || '';
+                targetRow.querySelector('.in-col3').value = cols[2] || '';
+                targetRow.querySelector('.in-col4').value = cols[3] || '';
+                targetRow = targetRow.nextElementSibling;
+            }
+        });
+        ensureSpareRow();
+    }
+}
+function ensureSpareRow() {
+    const rows = document.querySelectorAll('#tableBody tr');
+    if (rows.length === 0) return;
+    if (rows[rows.length - 1].querySelector('.in-col1').value.trim()) addTableRow();
+}
+function saveTableWords() {
+    const chapterId = document.getElementById('chapterSelectAdmin').value;
+    if (!chapterId) return Swal.fire({ icon: 'warning', text: 'เลือกกล่องเด็คก่อนนะ!' });
+    let savedCount = 0;
+    document.querySelectorAll('#tableBody tr').forEach(row => {
+        const col1 = row.querySelector('.in-col1').value.trim();
+        if (col1) {
+            appData.words.push({
+                chapterId, col1,
+                col2: row.querySelector('.in-col2').value.trim(),
+                col3: row.querySelector('.in-col3').value.trim(),
+                col4: row.querySelector('.in-col4').value.trim(),
+                cn: col1
+            });
+            savedCount++;
+        }
+    });
+    if (savedCount > 0) {
+        saveData();
+        document.getElementById('tableBody').innerHTML = '';
+        addMultipleRows(3); updateDropdowns();
+        Swal.fire({ icon: 'success', text: `บันทึกข้อมูล ${savedCount} รายการ สำเร็จ!` });
+    }
+}
+function saveData() { try { localStorage.setItem('pkmnWordData', JSON.stringify(appData)); } catch (e) {} }
+
+// ===== TTS =====
+function speakChinese(t) {
+    if (!t || t === '-') return;
+    const u = new SpeechSynthesisUtterance(t);
+    u.lang = 'zh-CN'; u.rate = 0.85;
+    window.speechSynthesis.speak(u);
+}
+
+// ===== 1. Battle Mode =====
+function startStudy() {
+    const chapterId = document.getElementById('chapterSelectStudy').value;
+    if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อน' });
+    currentStudyPool = appData.words.filter(w => w.chapterId === chapterId);
+    if (currentStudyPool.length === 0) return Swal.fire({ icon: 'warning', text: 'กล่องว่างเปล่า!' });
+    document.getElementById('study-area').style.display = 'flex';
+    lastShownIndex = -1; nextRandomWord();
+}
+function nextRandomWord() {
+    if (currentStudyPool.length === 0) {
+        document.getElementById('study-area').style.display = 'none';
+        return Swal.fire({ icon: 'success', title: 'Master!', text: 'คุณจดจำข้อมูลทั้งหมดได้แล้ว!' });
+    }
+    document.getElementById('card-counter').innerText = `เหลือข้อมูล: ${currentStudyPool.length}`;
+    let randIdx = Math.floor(Math.random() * currentStudyPool.length);
+    if (currentStudyPool.length > 1 && randIdx === lastShownIndex) randIdx = (randIdx + 1) % currentStudyPool.length;
+    currentWordIndex = randIdx; lastShownIndex = currentWordIndex;
+    const word = currentStudyPool[currentWordIndex];
+    document.getElementById('display-col1').innerText = word.col1 || word.cn || '-';
+    document.getElementById('display-col2').innerText = word.col2 || word.pin || '-';
+    document.getElementById('display-col3').innerText = word.col3 || word.thRead || '-';
+    document.getElementById('display-col4').innerText = word.col4 || word.thMean || '-';
+    document.getElementById('btn-speak').style.display = 'block';
+    document.getElementById('display-details').style.display = 'none';
+    document.getElementById('btn-show-trans').style.display = 'block';
+    document.getElementById('action-buttons').style.display = 'none';
+}
+function showTranslation() {
+    document.getElementById('display-details').style.display = 'block';
+    document.getElementById('btn-show-trans').style.display = 'none';
+    document.getElementById('action-buttons').style.display = 'flex';
+}
+function markWord(isRemembered) {
+    if (isRemembered) { currentStudyPool.splice(currentWordIndex, 1); lastShownIndex = -1; }
+    nextRandomWord();
+}
+
+// ===== 2. Dictation =====
+function startDictation() {
+    const chapterId = document.getElementById('chapterSelectDictation').value;
+    if (!chapterId) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนเริ่มทำภารกิจวิจัย!' });
+    dictationPool = appData.words.filter(w => w.chapterId === chapterId);
+    if (dictationPool.length === 0) return Swal.fire({ icon: 'warning', text: 'กล่องนี้ยังไม่มีข้อมูลคำศัพท์เลย!' });
+    dictationPool = dictationPool.sort(() => Math.random() - 0.5);
+    document.getElementById('dictation-area').style.display = 'flex';
+    nextDictationWord();
+}
+function nextDictationWord() {
+    if (dictationPool.length === 0) {
+        document.getElementById('dictation-area').style.display = 'none';
+        return Swal.fire({ icon: 'success', title: 'Mission Clear!', text: '🎉 ภารกิจสำเร็จ! ศาสตราจารย์ภูมิใจในตัวคุณมาก คุณถอดรหัสครบทุกคำแล้ว!' });
+    }
+    document.getElementById('dic-counter').innerText = `รอการวิจัย: ${dictationPool.length}`;
+    document.getElementById('dic-reveal-area').style.display = 'none';
+    document.getElementById('btn-reveal-dic').style.display = 'block';
+    document.getElementById('dic-action-buttons').style.display = 'none';
+    currentDictWord = dictationPool[0];
+    const target = currentDictWord.col1 || currentDictWord.cn;
+    document.getElementById('dic-target-word').innerText = target;
+    document.getElementById('dic-col2').innerText = currentDictWord.col2 || currentDictWord.pin || '-';
+    document.getElementById('dic-col4').innerText = currentDictWord.col4 || currentDictWord.thMean || '-';
+    setTimeout(() => speakChinese(target), 500);
+}
+function revealDictationAnswer() {
+    document.getElementById('dic-reveal-area').style.display = 'block';
+    document.getElementById('btn-reveal-dic').style.display = 'none';
+    document.getElementById('dic-action-buttons').style.display = 'flex';
+}
+function markDictationWord(isCorrect) {
+    const w = dictationPool.shift();
+    if (!isCorrect) dictationPool.push(w);
+    nextDictationWord();
+}
+
+// ===== เตรียมสอบ =====
+const EXAM_MODES = [
+    { id: 1, icon: '📝', title: 'คำศัพท์ เขียนพินอิน+คำแปล', hint: 'ฝึก 20 ข้อ จากเด็คของคุณ', start: examVocab },
+    { id: 2, icon: '🔢', title: 'เขียนเลขจีน 1-10', hint: 'เลขอารบิก ↔ ตัวจีน', start: examNumbers },
+    { id: 3, icon: '💴', title: 'ราคาสินค้าแบบจีน', hint: '5 ข้อ 块 / 毛', start: examPrices },
+    { id: 4, icon: '🎵', title: 'การผันเสียงของ 一', hint: 'เลือก yī / yí / yì', start: examYi },
+    { id: 5, icon: '🏫', title: 'สถานที่', hint: '10 ข้อ', start: examPlaces },
+    { id: 6, icon: '🖼️', title: 'เขียนบรรยายภาพ', hint: '5 ข้อ', start: examPictures },
+    { id: 7, icon: '🧩', title: 'เรียงประโยค', hint: 'แตะคำให้เป็นประโยค', start: examOrder },
+    { id: 8, icon: '✅', title: 'เลือก 是 / 不是', hint: 'เติมคำให้ถูก', start: examShiBu }
+];
+function shuffleArr(a) { return a.slice().sort(() => Math.random() - 0.5); }
+
+function showExamMenu() {
+    document.getElementById('examPanel').style.display = 'none';
+    document.getElementById('examMenu').style.display = 'block';
+    const grid = document.getElementById('examGrid');
+    if (grid.children.length) return;
+    EXAM_MODES.forEach(m => {
+        const b = mkEl('button', 'exam-card');
+        const top = mkEl('div');
+        top.appendChild(mkEl('span', 'no', String(m.id)));
+        top.appendChild(mkEl('b', '', m.icon + ' ' + m.title));
+        b.appendChild(top);
+        b.appendChild(mkEl('small', '', m.hint));
+        b.addEventListener('click', () => openExam(m.id));
+        grid.appendChild(b);
+    });
+}
+function openExam(id) {
+    const m = EXAM_MODES.find(x => x.id === id);
+    document.getElementById('examMenu').style.display = 'none';
+    document.getElementById('examPanel').style.display = 'block';
+    document.getElementById('examTitle').textContent = m.icon + ' ' + m.id + '. ' + m.title;
+    document.getElementById('examInfo').innerHTML = '';
+    document.getElementById('examControls').innerHTML = '';
+    document.getElementById('examBody').innerHTML = '';
+    window.speechSynthesis.cancel();
+    m.start();
+}
+function setExamInfo(text) {
+    const box = document.getElementById('examInfo');
+    box.innerHTML = '';
+    const d = mkEl('div', 'info-box');
+    text.split('\n').forEach((line, i) => { if (i) d.appendChild(document.createElement('br')); d.appendChild(document.createTextNode(line)); });
+    box.appendChild(d);
+}
+function addExamSelect(label, options) {
+    const wrap = mkEl('div');
+    wrap.appendChild(mkEl('label', '', label));
+    const sel = document.createElement('select');
+    options.forEach(([v, t]) => { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); });
+    wrap.appendChild(sel);
+    document.getElementById('examControls').appendChild(wrap);
+    return sel;
+}
+function addExamButton(text, fn) {
+    const wrap = mkEl('div');
+    wrap.appendChild(mkEl('label', '', '\u00a0'));
+    const b = mkEl('button', 'btn-main', text);
+    b.style.width = '100%';
+    b.addEventListener('click', fn);
+    wrap.appendChild(b);
+    document.getElementById('examControls').appendChild(wrap);
+    return b;
+}
+
+// ----- ตัวช่วยการ์ด Pokedex สำหรับเตรียมสอบ -----
+function dexShell(label, right) {
+    const wrap = mkEl('div', 'play-area');
+    const dex = mkEl('div', 'pokedex-container');
+    dex.appendChild(mkEl('div', 'pokedex-lens'));
+    const sw = mkEl('div', 'pokedex-screen-wrapper');
+    const sc = mkEl('div', 'pokedex-screen');
+    const hd = mkEl('div', 'dex-header');
+    hd.appendChild(mkEl('span', '', label));
+    hd.appendChild(mkEl('span', '', right));
+    sc.appendChild(hd); sw.appendChild(sc);
+    const ctl = mkEl('div', 'pokedex-controls');
+    dex.appendChild(sw); dex.appendChild(ctl); wrap.appendChild(dex);
+    document.getElementById('examBody').appendChild(wrap);
+    return { sc, ctl };
+}
+function examFinish(body, total, regen) {
+    body.appendChild(mkEl('div', 'ws-score', '🎉 ภารกิจสำเร็จ! ตอบถูกครบ ' + total + ' ข้อ'));
+    const b = mkEl('button', 'btn-main', '🔄 สุ่มชุดใหม่');
+    b.addEventListener('click', regen);
+    body.appendChild(b);
+}
+function dexQuestion(sc, it) {
+    sc.appendChild(mkEl('div', 'main-word-display zh', it.main));
+    if (it.sub) {
+        const s = mkEl('div', 'ws-sub', it.sub);
+        s.style.cssText = 'margin-top:8px;text-align:center;';
+        sc.appendChild(s);
+    }
+    if (it.speak) {
+        const sp = mkEl('button', 'speak-btn', '🔊 ฟังเสียง');
+        sp.addEventListener('click', () => speakChinese(it.speak));
+        sc.appendChild(sp);
+    }
+}
+
+// ----- ใบงาน: ดูเฉลย + ตรวจเอง (ข้อ 1,2,3,5,6) -----
+function renderWorksheet(items, regen) {
+    const body = document.getElementById('examBody');
+    body.innerHTML = '';
+    const queue = items.slice(), total = items.length;
+    let done = 0;
+    function show() {
+        body.innerHTML = '';
+        if (!queue.length) return examFinish(body, total, regen);
+        const it = queue[0];
+        const { sc, ctl } = dexShell('EXAM CARD', 'เหลือ: ' + queue.length + '  ✅ ' + done + '/' + total);
+        dexQuestion(sc, it);
+        const rv = mkEl('div', 'reveal-box');
+        it.answer.forEach(([t, c]) => rv.appendChild(mkEl('div', c || '', t)));
+        sc.appendChild(rv);
+        const scan = mkEl('button', 'action-btn btn-scan', '🔍 สแกนดูเฉลย');
+        const acts = mkEl('div', 'battle-actions');
+        const ok = mkEl('button', 'action-btn btn-catch', 'เขียนถูก! ✅');
+        const no = mkEl('button', 'action-btn btn-run', 'เขียนผิด ❌');
+        scan.addEventListener('click', () => { rv.style.display = 'block'; scan.style.display = 'none'; acts.style.display = 'flex'; });
+        ok.addEventListener('click', () => { queue.shift(); done++; show(); });
+        no.addEventListener('click', () => { queue.push(queue.shift()); show(); });
+        acts.appendChild(ok); acts.appendChild(no);
+        ctl.appendChild(scan); ctl.appendChild(acts);
+    }
+    show();
+}
+
+// ----- แบบเลือกตอบ (ข้อ 4, 8) -----
+function runQuiz(items, regen) {
+    const body = document.getElementById('examBody');
+    const queue = items.slice(), total = items.length;
+    let done = 0;
+    function show() {
+        body.innerHTML = '';
+        if (!queue.length) return examFinish(body, total, regen);
+        const it = queue[0];
+        const { sc, ctl } = dexShell('QUIZ CARD', 'เหลือ: ' + queue.length + '  ✅ ' + done + '/' + total);
+        dexQuestion(sc, it);
+        const optBox = mkEl('div');
+        optBox.style.cssText = 'margin-top:12px;text-align:center;';
+        const fb = mkEl('div', 'data-val');
+        fb.style.cssText = 'display:none;margin-top:10px;text-align:center;';
+        const next = mkEl('button', 'action-btn btn-scan', 'ข้อต่อไป ▶');
+        next.style.display = 'none';
+        next.addEventListener('click', show);
+        let answered = false;
+        it.options.forEach(o => {
+            const b = mkEl('button', 'quiz-opt', o);
+            b.addEventListener('click', () => {
+                if (answered) return;
+                answered = true;
+                const right = o === it.answer;
+                b.classList.add(right ? 'ok' : 'bad');
+                if (!right) Array.from(optBox.children).forEach(x => { if (x.textContent === it.answer) x.classList.add('ok'); });
+                fb.textContent = (right ? '✅ ถูกต้อง! ' : '❌ ผิด (จะวนมาถามใหม่) ') + (it.why || '');
+                fb.style.display = 'block';
+                next.style.display = 'block';
+                if (right) { queue.shift(); done++; } else { queue.push(queue.shift()); }
+            });
+            optBox.appendChild(b);
+        });
+        sc.appendChild(optBox); sc.appendChild(fb);
+        ctl.appendChild(next);
+    }
+    show();
+}
+
+// ----- เรียงประโยค (ข้อ 7) -----
+function runOrder(items, regen) {
+    const body = document.getElementById('examBody');
+    const queue = items.slice(), total = items.length;
+    let done = 0;
+    function show() {
+        body.innerHTML = '';
+        if (!queue.length) return examFinish(body, total, regen);
+        const [words, py, th] = queue[0];
+        const correct = words.join('');
+        const { sc, ctl } = dexShell('ORDER CARD', 'เหลือ: ' + queue.length + '  ✅ ' + done + '/' + total);
+        const s = mkEl('div', 'ws-sub', 'เรียงให้เป็นประโยค — ' + th);
+        s.style.cssText = 'text-align:center;margin-bottom:8px;';
+        sc.appendChild(s);
+        const zone = mkEl('div', 'answer-zone');
+        const pool = mkEl('div');
+        const fb = mkEl('div', 'data-val');
+        fb.style.cssText = 'display:none;margin-top:10px;text-align:center;';
+        sc.appendChild(zone); sc.appendChild(pool); sc.appendChild(fb);
+        const bCheck = mkEl('button', 'action-btn btn-scan', '✔️ ตรวจ');
+        const bClear = mkEl('button', 'action-btn btn-run', '↩️ ล้าง');
+        const next = mkEl('button', 'action-btn btn-check', 'ข้อต่อไป ▶');
+        next.style.display = 'none';
+        ctl.appendChild(bCheck); ctl.appendChild(bClear); ctl.appendChild(next);
+
+        let tiles = words.map(w => ({ w, used: false })), tries = 0;
+        do { tiles = shuffleArr(tiles); tries++; } while (tiles.map(t => t.w).join('') === correct && words.length > 1 && tries < 10);
+        let chosen = [], locked = false;
+
+        function draw() {
+            zone.innerHTML = ''; pool.innerHTML = '';
+            chosen.forEach(t => {
+                const b = mkEl('button', 'chip zh', t.w);
+                b.addEventListener('click', () => { if (locked) return; t.used = false; chosen = chosen.filter(x => x !== t); draw(); });
+                zone.appendChild(b);
+            });
+            tiles.forEach(t => {
+                if (t.used) return;
+                const b = mkEl('button', 'chip zh', t.w);
+                b.addEventListener('click', () => { if (locked) return; t.used = true; chosen.push(t); draw(); });
+                pool.appendChild(b);
+            });
+        }
+        bClear.addEventListener('click', () => { if (locked) return; tiles.forEach(t => t.used = false); chosen = []; draw(); });
+        bCheck.addEventListener('click', () => {
+            if (locked || !chosen.length) return;
+            locked = true;
+            const ok = chosen.map(t => t.w).join('') === correct;
+            if (ok) { queue.shift(); done++; } else { queue.push(queue.shift()); }
+            fb.textContent = (ok ? '✅ ถูกต้อง! ' : '❌ ยังไม่ถูก (จะวนมาถามใหม่) เฉลย: ') + correct + '  (' + py + ')';
+            fb.style.display = 'block';
+            bCheck.style.display = 'none'; bClear.style.display = 'none'; next.style.display = 'block';
+            speakChinese(correct);
+        });
+        next.addEventListener('click', show);
+        draw();
+    }
+    show();
+}
+
+// ---------- 1. คำศัพท์ ----------
+function examVocab() {
+    setExamInfo('เห็นตัวจีน → เขียนพินอินและคำแปลลงกระดาษ แล้วกด "สแกนดูเฉลย" และกด ✅/❌ (ข้อที่ผิดจะวนกลับมาใหม่)');
+    const sel = addExamSelect('เลือกกล่องเด็ค', [['', '-- เลือกเด็ค --']].concat(appData.chapters.map(c => [c.id, c.name])));
+    const cnt = addExamSelect('จำนวนข้อ', [['10', '10 ข้อ'], ['20', '20 ข้อ'], ['30', '30 ข้อ']]);
+    cnt.value = '20';
+    const go = () => {
+        if (!sel.value) return Swal.fire({ icon: 'info', text: 'เลือกกล่องเด็คก่อนนะ!' });
+        const all = appData.words.filter(w => w.chapterId === sel.value);
+        if (all.length === 0) return Swal.fire({ icon: 'warning', text: 'กล่องนี้ยังไม่มีคำศัพท์!' });
+        const picked = shuffleArr(all).slice(0, parseInt(cnt.value));
+        renderWorksheet(picked.map(w => ({
+            main: w.col1 || w.cn || '-', speak: w.col1 || w.cn,
+            answer: [[w.col2 || w.pin || '-', 'ans-py'], [w.col4 || w.thMean || '-', 'ans-th']]
+        })), go);
+    };
+    addExamButton('เริ่ม / สุ่มชุดใหม่', go);
+}
+
+// ---------- 2. เลขจีน ----------
+const CN_D = '零一二三四五六七八九十';
+const CN_P = ['líng', 'yī', 'èr', 'sān', 'sì', 'wǔ', 'liù', 'qī', 'bā', 'jiǔ', 'shí'];
+function examNumbers() {
+    setExamInfo('เขียนบนกระดาษ แล้วกด "สแกนดูเฉลย" ตรวจตัวอักษรและขีดให้ถูก (ระวัง 九 และ 十)');
+    const dir = addExamSelect('โจทย์', [['0', 'เลขอารบิก → เขียนตัวจีน'], ['1', 'ตัวจีน → เลขอารบิก + พินอิน']]);
+    const ord = addExamSelect('ลำดับ', [['0', 'เรียง 1 → 10'], ['1', 'สุ่ม']]);
+    const go = () => {
+        let list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        if (ord.value === '1') list = shuffleArr(list);
+        renderWorksheet(list.map(n => dir.value === '0'
+            ? { main: String(n), sub: 'เขียนเป็นเลขจีน', speak: CN_D[n], answer: [[CN_D[n], 'ans-zh zh'], [CN_P[n], 'ans-py']] }
+            : { main: CN_D[n], sub: 'เลขอะไร / อ่านว่าอะไร', speak: CN_D[n], answer: [[String(n), 'ans-zh'], [CN_P[n], 'ans-py']] }
+        ), go);
+    };
+    addExamButton('เริ่ม / สุ่มชุดใหม่', go);
+    go();
+}
+
+// ---------- 3. ราคา ----------
+const CN_PY = { '零': 'líng', '一': 'yī', '二': 'èr', '两': 'liǎng', '三': 'sān', '四': 'sì', '五': 'wǔ', '六': 'liù', '七': 'qī', '八': 'bā', '九': 'jiǔ', '十': 'shí', '块': 'kuài', '毛': 'máo', '元': 'yuán', '角': 'jiǎo' };
+function cnNum(n) {
+    if (n < 10) return CN_D[n];
+    if (n < 20) return '十' + (n % 10 ? CN_D[n % 10] : '');
+    return CN_D[Math.floor(n / 10)] + '十' + (n % 10 ? CN_D[n % 10] : '');
+}
+function cnPinyin(str) { return str.split('').map(ch => CN_PY[ch] || ch).join(' '); }
+function makePrice() {
+    let kuai = Math.floor(Math.random() * 60) + 1;
+    let mao = Math.random() < 0.4 ? 0 : Math.floor(Math.random() * 9) + 1;
+    if (Math.random() < 0.15) { kuai = 0; mao = Math.floor(Math.random() * 9) + 1; }
+    let spoken = '', written = '', short = '';
+    if (kuai > 0) { spoken += (kuai === 2 ? '两' : cnNum(kuai)) + '块'; written += cnNum(kuai) + '元'; }
+    if (mao > 0) { spoken += (mao === 2 ? '两' : CN_D[mao]) + '毛'; written += CN_D[mao] + '角'; }
+    if (kuai > 0 && mao > 0) short = (kuai === 2 ? '两' : cnNum(kuai)) + '块' + CN_D[mao];
+    return { shown: '¥' + kuai + (mao ? '.' + mao + '0' : ''), spoken, written, short };
+}
+function examPrices() {
+    setExamInfo('เขียนราคาเป็นภาษาจีนลงกระดาษ แล้วกด "สแกนดูเฉลย"\n块 (kuài) = หยวน (ภาษาพูด)  |  毛 (máo) = 1/10 หยวน  |  ภาษาเขียนใช้ 元 / 角\nเลข 2 ที่ตามด้วยหน่วย 块/毛 มักใช้ 两 เช่น 两块  |  พูดสั้นได้ เช่น 十二块五 (ละ 毛 ตัวท้าย)');
+    const go = () => {
+        const seen = new Set(), list = [];
+        while (list.length < 5) {
+            const pr = makePrice();
+            if (seen.has(pr.shown)) continue;
+            seen.add(pr.shown); list.push(pr);
+        }
+        renderWorksheet(list.map(pr => {
+            const ans = [[pr.spoken, 'ans-zh zh'], [cnPinyin(pr.spoken), 'ans-py']];
+            if (pr.short) ans.push(['พูดสั้น: ' + pr.short, 'ans-th zh']);
+            ans.push(['ภาษาเขียน: ' + pr.written, 'ans-th zh']);
+            return { main: pr.shown, sub: 'เขียนเป็นราคาจีน', speak: pr.spoken, answer: ans };
+        }), go);
+    };
+    addExamButton('🔄 สุ่มชุดใหม่', go);
+    go();
+}
+
+// ---------- 4. การผันเสียงของ 一 ----------
+const YI_ITEMS = [
+    ['一个', 'yí gè', 'yí', 'ตัวถัดไป (个) เสียง 4 → yí'],
+    ['一天', 'yì tiān', 'yì', 'ตัวถัดไป (天) เสียง 1 → yì'],
+    ['一起', 'yì qǐ', 'yì', 'ตัวถัดไป (起) เสียง 3 → yì'],
+    ['一年', 'yì nián', 'yì', 'ตัวถัดไป (年) เสียง 2 → yì'],
+    ['第一', 'dì yī', 'yī', 'ลำดับที่ / อยู่ท้ายคำ → yī'],
+    ['星期一', 'xīngqī yī', 'yī', 'อยู่ท้ายคำ → yī'],
+    ['一月', 'yī yuè', 'yī', 'ชื่อเดือนใช้ yī'],
+    ['一号', 'yī hào', 'yī', 'วันที่ใช้ yī'],
+    ['十一', 'shí yī', 'yī', 'เลขอยู่ท้าย → yī'],
+    ['一点', 'yì diǎn', 'yì', 'ตัวถัดไป (点) เสียง 3 → yì'],
+    ['一块', 'yí kuài', 'yí', 'ตัวถัดไป (块) เสียง 4 → yí'],
+    ['一下', 'yí xià', 'yí', 'ตัวถัดไป (下) เสียง 4 → yí'],
+    ['一些', 'yì xiē', 'yì', 'ตัวถัดไป (些) เสียง 1 → yì'],
+    ['一杯', 'yì bēi', 'yì', 'ตัวถัดไป (杯) เสียง 1 → yì'],
+    ['一共', 'yí gòng', 'yí', 'ตัวถัดไป (共) เสียง 4 → yí'],
+    ['一直', 'yì zhí', 'yì', 'ตัวถัดไป (直) เสียง 2 → yì'],
+    ['一定', 'yí dìng', 'yí', 'ตัวถัดไป (定) เสียง 4 → yí'],
+    ['一样', 'yí yàng', 'yí', 'ตัวถัดไป (样) เสียง 4 → yí'],
+    ['一半', 'yí bàn', 'yí', 'ตัวถัดไป (半) เสียง 4 → yí'],
+    ['一本', 'yì běn', 'yì', 'ตัวถัดไป (本) เสียง 3 → yì'],
+    ['一件', 'yí jiàn', 'yí', 'ตัวถัดไป (件) เสียง 4 → yí'],
+    ['一次', 'yí cì', 'yí', 'ตัวถัดไป (次) เสียง 4 → yí'],
+    ['一百', 'yì bǎi', 'yì', 'ตัวถัดไป (百) เสียง 3 → yì'],
+    ['一会儿', 'yí huìr', 'yí', 'ตัวถัดไป (会) เสียง 4 → yí'],
+    ['一', 'yī', 'yī', 'ออกเสียงเดี่ยว / นับเลข → yī']
+];
+function examYi() {
+    setExamInfo('หลักการผันเสียงของ 一:\n• ตามด้วยเสียง 4 → yí   • ตามด้วยเสียง 1, 2, 3 → yì\n• อยู่ท้ายคำ / ลำดับที่ / วันที่-เดือน / นับเลข → yī\nแถม: 不 ก็ผันเสียงคล้ายกัน ตามด้วยเสียง 4 → bú เช่น 不是 bú shì');
+    const go = () => {
+        runQuiz(shuffleArr(YI_ITEMS).slice(0, 10).map(([zh, full, ans, why]) => ({
+            main: zh, sub: 'ออกเสียง 一 ในคำนี้ว่าอย่างไร?', speak: zh,
+            options: ['yī', 'yí', 'yì'], answer: ans, why: zh + ' = ' + full + ' (' + why + ')'
+        })), go);
+    };
+    addExamButton('🔄 เริ่มชุดใหม่', go);
+    go();
+}
+
+// ---------- 5. สถานที่ ----------
+const PLACES = [
+    ['学校', 'xuéxiào', 'โรงเรียน'], ['医院', 'yīyuàn', 'โรงพยาบาล'], ['银行', 'yínháng', 'ธนาคาร'],
+    ['超市', 'chāoshì', 'ซูเปอร์มาร์เก็ต'], ['饭店', 'fàndiàn', 'ร้านอาหาร / ภัตตาคาร'], ['公园', 'gōngyuán', 'สวนสาธารณะ'],
+    ['机场', 'jīchǎng', 'สนามบิน'], ['图书馆', 'túshūguǎn', 'ห้องสมุด'], ['邮局', 'yóujú', 'ที่ทำการไปรษณีย์'],
+    ['商店', 'shāngdiàn', 'ร้านค้า'], ['火车站', 'huǒchēzhàn', 'สถานีรถไฟ'], ['洗手间', 'xǐshǒujiān', 'ห้องน้ำ'],
+    ['教室', 'jiàoshì', 'ห้องเรียน'], ['市场', 'shìchǎng', 'ตลาด'], ['书店', 'shūdiàn', 'ร้านหนังสือ'],
+    ['药店', 'yàodiàn', 'ร้านขายยา'], ['电影院', 'diànyǐngyuàn', 'โรงภาพยนตร์'], ['宾馆', 'bīnguǎn', 'โรงแรม'],
+    ['公司', 'gōngsī', 'บริษัท'], ['家', 'jiā', 'บ้าน']
+];
+function examPlaces() {
+    setExamInfo('เขียนคำตอบลงกระดาษ แล้วกด "สแกนดูเฉลย" ตรวจตัวจีนและพินอิน');
+    const dir = addExamSelect('โจทย์', [['0', 'ดูคำไทย → เขียนตัวจีน + พินอิน'], ['1', 'ดูตัวจีน → เขียนพินอิน + คำแปล']]);
+    const go = () => {
+        renderWorksheet(shuffleArr(PLACES).slice(0, 10).map(([zh, py, th]) => dir.value === '0'
+            ? { main: th, sub: 'เขียนเป็นภาษาจีน', speak: zh, answer: [[zh, 'ans-zh zh'], [py, 'ans-py']] }
+            : { main: zh, sub: 'เขียนพินอินและคำแปล', speak: zh, answer: [[py, 'ans-py'], [th, 'ans-th']] }
+        ), go);
+    };
+    addExamButton('เริ่ม / สุ่มชุดใหม่', go);
+    go();
+}
+
+// ---------- 6. เขียนบรรยายภาพ ----------
+const SCENES = [
+    ['👦📖', 'เด็กผู้ชายกับหนังสือ', '他在看书。', 'tā zài kàn shū', 'เขากำลังอ่านหนังสือ'],
+    ['👧🍚', 'เด็กผู้หญิงกับข้าว', '她在吃饭。', 'tā zài chī fàn', 'เธอกำลังกินข้าว'],
+    ['🏥👩‍⚕️', 'หมอที่โรงพยาบาล', '医生在医院。', 'yīshēng zài yīyuàn', 'หมออยู่ที่โรงพยาบาล'],
+    ['🛒👩', 'ผู้หญิงที่ซูเปอร์มาร์เก็ต', '她在超市买东西。', 'tā zài chāoshì mǎi dōngxi', 'เธอซื้อของที่ซูเปอร์มาร์เก็ต'],
+    ['🐱🛋️', 'แมวกับโซฟา', '猫在沙发上。', 'māo zài shāfā shàng', 'แมวอยู่บนโซฟา'],
+    ['📱👧', 'เด็กผู้หญิงกับมือถือ', '她在玩手机。', 'tā zài wán shǒujī', 'เธอกำลังเล่นมือถือ'],
+    ['🏃‍♂️🌳', 'ผู้ชายวิ่งในสวน', '他在公园跑步。', 'tā zài gōngyuán pǎobù', 'เขาวิ่งในสวนสาธารณะ'],
+    ['🎵🎧', 'ฟังเพลง', '她在听音乐。', 'tā zài tīng yīnyuè', 'เธอกำลังฟังเพลง'],
+    ['☕👨', 'ผู้ชายกับกาแฟ', '他在喝咖啡。', 'tā zài hē kāfēi', 'เขากำลังดื่มกาแฟ'],
+    ['🚌👦', 'เด็กผู้ชายกับรถเมล์', '他坐公共汽车。', 'tā zuò gōnggòng qìchē', 'เขานั่งรถเมล์'],
+    ['👩‍🏫📚', 'ครูกับหนังสือ', '老师在教室里。', 'lǎoshī zài jiàoshì lǐ', 'ครูอยู่ในห้องเรียน'],
+    ['🍎🍌', 'แอปเปิ้ลและกล้วย', '我有苹果和香蕉。', 'wǒ yǒu píngguǒ hé xiāngjiāo', 'ฉันมีแอปเปิ้ลกับกล้วย']
+];
+function examPictures() {
+    setExamInfo('ดูภาพ (อีโมจิ) แล้วเขียนประโยคจีนสั้น ๆ บรรยายภาพลงกระดาษ จากนั้นกด "สแกนดูเฉลย" เทียบกับประโยคตัวอย่าง\n(เขียนต่างจากตัวอย่างได้ ถ้าไวยากรณ์ถูก)');
+    const go = () => {
+        renderWorksheet(shuffleArr(SCENES).slice(0, 5).map(([pic, hint, zh, py, th]) => ({
+            main: pic, sub: 'ภาพ: ' + hint + ' — เขียนประโยคจีนบรรยายภาพนี้', speak: zh,
+            answer: [['ตัวอย่าง: ' + zh, 'ans-zh zh'], [py, 'ans-py'], [th, 'ans-th']]
+        })), go);
+    };
+    addExamButton('🔄 สุ่มชุดใหม่', go);
+    go();
+}
+
+// ---------- 7. เรียงประโยค ----------
+const ORDER_ITEMS = [
+    [['我', '在', '学校', '学习', '汉语'], 'wǒ zài xuéxiào xuéxí hànyǔ', 'ฉันเรียนภาษาจีนที่โรงเรียน'],
+    [['他', '不', '是', '老师'], 'tā bú shì lǎoshī', 'เขาไม่ใช่ครู'],
+    [['我们', '去', '公园', '玩'], 'wǒmen qù gōngyuán wán', 'พวกเราไปเที่ยวสวนสาธารณะ'],
+    [['她', '在', '看', '书'], 'tā zài kàn shū', 'เธอกำลังอ่านหนังสือ'],
+    [['这', '是', '我', '的', '书'], 'zhè shì wǒ de shū', 'นี่คือหนังสือของฉัน'],
+    [['你', '想', '吃', '什么'], 'nǐ xiǎng chī shénme', 'คุณอยากกินอะไร'],
+    [['我', '要', '买', '一个', '苹果'], 'wǒ yào mǎi yí gè píngguǒ', 'ฉันจะซื้อแอปเปิ้ลหนึ่งลูก'],
+    [['他', '住', '在', '北京'], 'tā zhù zài běijīng', 'เขาอาศัยอยู่ที่ปักกิ่ง'],
+    [['今天', '天气', '很', '好'], 'jīntiān tiānqì hěn hǎo', 'วันนี้อากาศดีมาก'],
+    [['银行', '在', '超市', '旁边'], 'yínháng zài chāoshì pángbiān', 'ธนาคารอยู่ข้างซูเปอร์มาร์เก็ต'],
+    [['我', '每天', '喝', '咖啡'], 'wǒ měitiān hē kāfēi', 'ฉันดื่มกาแฟทุกวัน'],
+    [['请问', '洗手间', '在', '哪儿'], 'qǐngwèn xǐshǒujiān zài nǎr', 'ขอถามหน่อย ห้องน้ำอยู่ที่ไหน'],
+    [['我', '不', '喝', '茶'], 'wǒ bù hē chá', 'ฉันไม่ดื่มชา'],
+    [['这个', '多少', '钱'], 'zhège duōshao qián', 'อันนี้ราคาเท่าไหร่']
+];
+function examOrder() {
+    setExamInfo('แตะคำด้านล่างเพื่อเรียงให้เป็นประโยคที่ถูกต้อง (แตะคำในกรอบเพื่อเอากลับ) แล้วกด "ตรวจ"\nโครงสร้างหลัก: ประธาน + เวลา + สถานที่ + กริยา + กรรม');
+    const go = () => runOrder(shuffleArr(ORDER_ITEMS).slice(0, 10), go);
+    addExamButton('🔄 เริ่มชุดใหม่', go);
+    go();
+}
+
+// ---------- 8. 是 / 不是 ----------
+const SHIBU_ITEMS = [
+    ['我（ ）学生。', '是', 'ฉันเป็นนักเรียน'],
+    ['他（ ）老师。', '不是', 'เขาไม่ใช่ครู'],
+    ['这（ ）我的书。', '是', 'นี่คือหนังสือของฉัน'],
+    ['那（ ）苹果，是香蕉。', '不是', 'นั่นไม่ใช่แอปเปิ้ล เป็นกล้วย'],
+    ['她（ ）泰国人。', '是', 'เธอเป็นคนไทย'],
+    ['我（ ）中国人，我是泰国人。', '不是', 'ฉันไม่ใช่คนจีน ฉันเป็นคนไทย'],
+    ['你（ ）医生吗？', '是', 'คุณเป็นหมอใช่ไหม'],
+    ['这（ ）我的手机。', '不是', 'นี่ไม่ใช่มือถือของฉัน'],
+    ['他们（ ）朋友。', '是', 'พวกเขาเป็นเพื่อนกัน'],
+    ['今天（ ）星期五，是星期六。', '不是', 'วันนี้ไม่ใช่วันศุกร์ เป็นวันเสาร์'],
+    ['我（ ）老师，我是学生。', '不是', 'ฉันไม่ใช่ครู ฉันเป็นนักเรียน'],
+    ['那（ ）医院。', '是', 'นั่นคือโรงพยาบาล'],
+    ['这（ ）咖啡，是茶。', '不是', 'นี่ไม่ใช่กาแฟ เป็นชา'],
+    ['他（ ）我的哥哥。', '是', 'เขาเป็นพี่ชายของฉัน']
+];
+function examShiBu() {
+    setExamInfo('อ่านประโยคและความหมายภาษาไทย แล้วเลือก 是 (เป็น/คือ) หรือ 不是 (ไม่ใช่) ให้เข้ากับช่องว่าง\nจำไว้: 不 + เสียง 4 → อ่านเป็น bú  (不是 = bú shì)');
+    const go = () => {
+        runQuiz(shuffleArr(SHIBU_ITEMS).slice(0, 10).map(([sent, ans, th]) => ({
+            main: sent, sub: 'ความหมาย: ' + th, options: ['是', '不是'], answer: ans,
+            why: sent.replace('（ ）', ans) + (ans === '不是' ? '  (不是 อ่านว่า bú shì)' : '  (是 อ่านว่า shì)')
+        })), go);
+    };
+    addExamButton('🔄 เริ่มชุดใหม่', go);
+    go();
+}
+
+// ===== Initialize =====
+(async () => {
+    try {
+        if (window.claude && window.claude.use) {
+            const smp = await window.claude.use('sample');
+            if (smp) {
+                aiSample = smp;
+                document.getElementById('btnAiGen').style.display = 'block';
+                document.getElementById('aiHelp').style.display = 'inline';
+                document.getElementById('manualHelp').style.display = 'none';
+                document.getElementById('manualFlow').open = false;
+            }
+        }
+    } catch (e) {}
+})();
+document.getElementById('tableBody').addEventListener('input', e => {
+    if (e.target.classList.contains('in-col1')) ensureSpareRow();
+});
+updateDropdowns();
+addMultipleRows(5);
+</script>
 </body>
 </html>
