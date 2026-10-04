@@ -122,6 +122,39 @@ button.btn-main:active{transform:translateY(4px);box-shadow:none}
 .btn-catch{background-color:#22c55e;color:#fff;flex:1;box-shadow:0 4px 0 #166534}
 .btn-run{background-color:#333;color:#fff;flex:1;box-shadow:0 4px 0 #000}
 .btn-check{background-color:var(--pk-blue);color:#fff;flex:2;box-shadow:0 4px 0 #1e3a8a}
+
+
+/* ===== โหมดหน้าจอ: มือถือ / คอมพิวเตอร์ ===== */
+.pc-hint{display:none;margin-top:8px;font-size:13px;color:#475569;text-align:center}
+.is-pc .pc-hint{display:block}
+.is-pc .pokedex-container{max-width:480px}
+.is-pc .action-btn:hover,.is-pc .speak-btn:hover,.is-pc .py-chip:hover{filter:brightness(1.08)}
+.is-mobile button,.is-mobile select{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.is-mobile header{padding:10px 0;border-bottom-width:6px}
+.is-mobile header h1{font-size:24px}
+.is-mobile .tabs{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;width:100%;box-sizing:border-box;padding:4px 10px 10px;margin-top:12px;-webkit-overflow-scrolling:touch}
+.is-mobile .tab-btn{flex:0 0 auto;white-space:nowrap;font-size:14px;padding:8px 12px}
+.is-mobile .tool-row{gap:6px;margin-top:6px;padding:0 8px;width:100%;box-sizing:border-box}
+.is-mobile .tool-row .zoom-bar{flex:1 1 100%;justify-content:center;padding:4px 8px;font-size:14px}
+.is-mobile .zoom-bar input{width:120px}
+.is-mobile .container{width:100%;margin:10px 0;padding:0 8px;box-sizing:border-box}
+.is-mobile .box{padding:14px;margin-bottom:16px}
+.is-mobile .box h2{font-size:18px}
+.is-mobile .pokedex-container{max-width:100%;padding:14px;margin-top:8px}
+.is-mobile .pokedex-screen{padding:10px}
+.is-mobile .action-btn{padding:14px 10px;min-height:50px;font-size:17px}
+.is-mobile .speak-btn{padding:10px 20px}
+.is-mobile .quiz-opt,.is-mobile .chip{padding:10px 16px}
+.is-mobile .view-table td{padding:6px 8px;font-size:15px}
+.is-mobile .view-table td.zh{font-size:calc(34px*var(--zh-scale))}
+.is-mobile .view-table td.pin{font-size:16px}
+.is-mobile #admin-container .word-table{min-width:560px}
+.is-mobile .word-table input{font-size:16px}
+.is-mobile .sent-row>div{min-width:44%}
+.is-mobile .exam-grid{grid-template-columns:1fr 1fr;gap:8px}
+.is-mobile .exam-card{padding:10px}
+.is-mobile .exam-card b{font-size:14px}
+.is-mobile .table-actions button{flex:1 1 auto}
 </style>
 </head>
 <body>
@@ -152,7 +185,12 @@ button.btn-main:active{transform:translateY(4px);box-shadow:none}
     <button onclick="speakChinese('你好，我是学生。')">ทดสอบ</button>
 </div>
 <div class="zoom-bar"><span>🔤 พินอิน</span><button onclick="showPinyin()">พยัญชนะ/สระ</button></div>
+<div class="zoom-bar"><span>🖥️ หน้าจอ</span>
+    <select id="viewSel" style="width:auto;padding:4px;font-size:14px;" onchange="applyView(this.value)">
+        <option value="auto">อัตโนมัติ</option><option value="mobile">📱 มือถือ</option><option value="pc">💻 คอมพิวเตอร์</option>
+    </select></div>
 </div>
+<div class="pc-hint">⌨️ ปุ่มลัด: Space / Enter = สแกนดูเฉลย·ตรวจ·ข้อต่อไป &nbsp;|&nbsp; → = ถูก &nbsp;|&nbsp; ← = ผิด &nbsp;|&nbsp; S = ฟังเสียง</div>
 
 <!-- 1. แบทเทิล -->
 <div class="container active" id="study-container">
@@ -359,6 +397,8 @@ function switchTab(tab) {
     if (tab === 'table') renderWordTable();
     if (tab === 'sentence') renderSentences();
     if (tab === 'exam') showExamMenu();
+    const ab = document.querySelector('.tab-btn.active');
+    if (ab && ab.scrollIntoView) ab.scrollIntoView({ inline: 'center', block: 'nearest' });
 }
 
 // ===== PC Box =====
@@ -765,6 +805,7 @@ function speakChinese(t, queue) {
 try { const r = localStorage.getItem('pkmnTtsRate'); if (r) document.getElementById('rateSel').value = r; } catch (e) {}
 loadVoices();
 if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = loadVoices;
+
 
 
 // ===== ตารางพินอิน: พยัญชนะ (声母) / สระ (韵母) =====
@@ -1336,6 +1377,45 @@ function examShiBu() {
     go();
 }
 
+
+// ===== โหมดหน้าจอ (อัตโนมัติ / มือถือ / คอมพิวเตอร์) =====
+function applyView(v) {
+    if (!['auto', 'mobile', 'pc'].includes(v)) v = 'auto';
+    const eff = v === 'auto' ? (window.innerWidth <= 760 ? 'mobile' : 'pc') : v;
+    const root = document.documentElement;
+    root.classList.toggle('is-mobile', eff === 'mobile');
+    root.classList.toggle('is-pc', eff === 'pc');
+    const sel = document.getElementById('viewSel');
+    if (sel) sel.value = v;
+    try { localStorage.setItem('pkmnView', v); } catch (e) {}
+}
+function initView() {
+    let v = 'auto';
+    try { v = localStorage.getItem('pkmnView') || 'auto'; } catch (e) {}
+    applyView(v);
+    window.addEventListener('resize', () => {
+        const cur = document.getElementById('viewSel').value;
+        if (cur === 'auto') applyView('auto');
+    });
+}
+// ปุ่มลัดบนคอมพิวเตอร์
+document.addEventListener('keydown', e => {
+    if (!document.documentElement.classList.contains('is-pc')) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (['input', 'textarea', 'select'].includes(tag) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (document.querySelector('.swal2-container')) return;
+    if (tag === 'button' && (e.key === ' ' || e.key === 'Enter')) return;
+    const box = document.querySelector('.container.active');
+    if (!box) return;
+    const vis = sel => Array.from(box.querySelectorAll(sel)).find(b => b.offsetParent !== null);
+    let target = null;
+    if (e.key === ' ' || e.key === 'Enter') target = vis('.btn-scan') || vis('.btn-check');
+    else if (e.key === 'ArrowRight') target = vis('.battle-actions .btn-catch');
+    else if (e.key === 'ArrowLeft') target = vis('.battle-actions .btn-run');
+    else if (e.key === 's' || e.key === 'S') target = vis('.speak-btn');
+    if (target) { e.preventDefault(); target.click(); }
+});
+
 // ===== Initialize =====
 (async () => {
     try {
@@ -1354,6 +1434,7 @@ function examShiBu() {
 document.getElementById('tableBody').addEventListener('input', e => {
     if (e.target.classList.contains('in-col1')) ensureSpareRow();
 });
+initView();
 updateDropdowns();
 addMultipleRows(5);
 </script>
